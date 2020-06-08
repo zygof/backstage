@@ -17,12 +17,46 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import CatalogPage from './CatalogPage';
-import { ApiRegistry, ApiProvider, errorApiRef } from '@backstage/core';
+import {
+  ApiProvider,
+  ApiRegistry,
+  CreateStorageApiOptions,
+  errorApiRef,
+  storageApiRef,
+  StorageApi,
+  WebStorage,
+} from '@backstage/core';
 import { wrapInTestApp } from '@backstage/test-utils';
 import { catalogApiRef } from '../..';
+import { CatalogApi } from '../../api/types';
+import { Entity } from '@backstage/catalog-model';
 
 const errorApi = { post: () => {} };
-const catalogApi = { getEntities: () => Promise.resolve([{ kind: '' }]) };
+const catalogApi: Partial<CatalogApi> = {
+  getEntities: () =>
+    Promise.resolve([
+      {
+        metadata: {
+          name: 'Entity1',
+        },
+        apiVersion: 'backstage.io/v1beta1',
+        kind: 'Component',
+      },
+    ] as Entity[]),
+  getLocationByEntity: () =>
+    Promise.resolve({ id: 'id', type: 'github', target: 'url' }),
+};
+
+const mockWebStorageErrorApi = { post: jest.fn(), error$: jest.fn() };
+const createWebStorage = (
+  args?: Partial<CreateStorageApiOptions>,
+): StorageApi => {
+  return WebStorage.create({
+    errorApi: mockWebStorageErrorApi,
+    ...args,
+  });
+};
+const storageApi = createWebStorage();
 
 describe('CatalogPage', () => {
   // this test right now causes some red lines in the log output when running tests
@@ -35,6 +69,7 @@ describe('CatalogPage', () => {
           apis={ApiRegistry.from([
             [errorApiRef, errorApi],
             [catalogApiRef, catalogApi],
+            [storageApiRef, storageApi],
           ])}
         >
           <CatalogPage />

@@ -17,6 +17,8 @@ import React, { FC } from 'react';
 import { Component } from '../../data/component';
 import { InfoCard, Progress, Table, TableColumn } from '@backstage/core';
 import { Typography, Link } from '@material-ui/core';
+import { Link as RouterLink, generatePath } from 'react-router-dom';
+import { entityRoute } from '../../routes';
 
 const columns: TableColumn[] = [
   {
@@ -24,7 +26,12 @@ const columns: TableColumn[] = [
     field: 'name',
     highlight: true,
     render: (componentData: any) => (
-      <Link href={`/catalog/${componentData.name}`}>{componentData.name}</Link>
+      <Link
+        component={RouterLink}
+        to={generatePath(entityRoute.path, { name: componentData.name })}
+      >
+        {componentData.name}
+      </Link>
     ),
   },
   {
@@ -42,12 +49,14 @@ type CatalogTableProps = {
   titlePreamble: string;
   loading: boolean;
   error?: any;
+  actions?: any;
 };
 const CatalogTable: FC<CatalogTableProps> = ({
   components,
   loading,
   error,
   titlePreamble,
+  actions,
 }) => {
   if (loading) {
     return <Progress />;
@@ -64,9 +73,10 @@ const CatalogTable: FC<CatalogTableProps> = ({
   return (
     <Table
       columns={columns}
-      options={{ paging: false }}
+      options={{ paging: false, actionsColumnIndex: -1 }}
       title={`${titlePreamble} (${(components && components.length) || 0})`}
       data={components}
+      actions={actions}
     />
   );
 };
