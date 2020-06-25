@@ -22,17 +22,15 @@ import {
   Preparers,
 } from '@backstage/plugin-scaffolder-backend';
 import type { PluginEnvironment } from '../types';
-import Docker from 'dockerode';
 
 export default async function createPlugin({ logger }: PluginEnvironment) {
   const templater = new CookieCutter();
   const filePreparer = new FilePreparer();
   const githubPreparer = new GithubPreparer();
   const preparers = new Preparers();
-  const dockerClient = new Docker();
 
   preparers.register('file', filePreparer);
   preparers.register('github', githubPreparer);
 
-  return await createRouter({ preparers, templater, logger, dockerClient });
+  return await createRouter({ preparers, templater, logger });
 }

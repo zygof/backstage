@@ -19,20 +19,18 @@ import Router from 'express-promise-router';
 import express from 'express';
 import { PreparerBuilder, TemplaterBase } from '../scaffolder';
 import { TemplateEntityV1alpha1 } from '@backstage/catalog-model';
-import Docker from 'dockerode';
 
 export interface RouterOptions {
   preparers: PreparerBuilder;
   templater: TemplaterBase;
   logger: Logger;
-  dockerClient: Docker;
 }
 
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
   const router = Router();
-  const { preparers, templater, logger: parentLogger, dockerClient } = options;
+  const { preparers, templater, logger: parentLogger } = options;
   const logger = parentLogger.child({ plugin: 'scaffolder' });
 
   router.post('/v1/jobs', async (_, res) => {
@@ -68,16 +66,12 @@ export async function createRouter(
     const preparer = preparers.get(mockEntity);
 
     // Run the preparer for the mock entity to produce a temporary directory with template in
-    const skeletonPath = await preparer.prepare(mockEntity);
+    const path = await preparer.prepare(mockEntity);
 
     // Run the templater on the mock directory with values from the post body
-    const templatedPath = await templater.run({
-      directory: skeletonPath,
-      values: { component_id: 'test' },
-      dockerClient,
-    });
+    await templater.run({ directory: path, values: { component_id: 'test' } });
 
-    console.warn(templatedPath);
+    console.warn(path);
   });
 
   const app = express();
