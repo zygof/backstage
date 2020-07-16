@@ -84,7 +84,7 @@ And that's it! You are good to go 👍
 
 ### Next step
 
-Take a look at the [Getting Started](docs/getting-started/README.md) guide to learn more about how to extend the functionality with Plugins.
+Take a look at the [Getting Started](docs/getting-started/index.md) guide to learn more about how to extend the functionality with Plugins.
 
 ## Documentation
 
