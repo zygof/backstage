@@ -20,7 +20,7 @@ import { WorkflowRunsPage } from './components/WorkflowRunsPage';
 
 // TODO(freben): This is just a demo route for now
 export const rootRouteRef = createRouteRef({
-  path: '/github-actions',
+  path: '/',
   title: 'GitHub Actions',
 });
 export const projectRouteRef = createRouteRef({
@@ -28,7 +28,7 @@ export const projectRouteRef = createRouteRef({
   title: 'GitHub Actions for project',
 });
 export const buildRouteRef = createRouteRef({
-  path: '/github-actions/workflow-run/:id',
+  path: '/workflow-run/:id',
   title: 'GitHub Actions Workflow Run',
 });
 

@@ -17,3 +17,4 @@
 export { plugin } from './plugin';
 export * from './api';
 export { Widget } from './components/Widget';
+export { Plugin } from './GithubActionsPlugin';
