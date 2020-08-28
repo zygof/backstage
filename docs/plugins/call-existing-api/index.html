@@ -118,11 +118,7 @@ easily add proxy routes to downstream APIs.</p>
 <p>Example:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-comment"># In app-config.yaml</span>
 <span class="hljs-attr">proxy:</span>
-  <span class="hljs-string">'/frobs'</span><span class="hljs-string">:</span>
-    <span class="hljs-attr">target:</span> <span class="hljs-string">'http://api.frobsco.com/v1'</span>
-    <span class="hljs-attr">changeOrigin:</span> <span class="hljs-literal">true</span>
-    <span class="hljs-attr">pathRewrite:</span>
-      <span class="hljs-string">'^/proxy/frobs/'</span><span class="hljs-string">:</span> <span class="hljs-string">'/'</span>
+  <span class="hljs-string">'/frobs'</span><span class="hljs-string">:</span> <span class="hljs-string">http://api.frobsco.com/v1</span>
 </code></pre>
 <pre><code class="hljs css language-ts"><span class="hljs-comment">// Inside your component</span>
 <span class="hljs-keyword">const</span> backendUrl = config.getString(<span class="hljs-string">'backend.baseUrl'</span>);
@@ -130,9 +126,8 @@ fetch(<span class="hljs-string">`<span class="hljs-subst">${backendUrl}</span>/p
   .then(<span class="hljs-function"><span class="hljs-params">response</span> =&gt;</span> response.json())
   .then(<span class="hljs-function"><span class="hljs-params">payload</span> =&gt;</span> setFrobs(payload <span class="hljs-keyword">as</span> Frob[]));
 </code></pre>
-<p>The proxy is powered by the <code>http-proxy-middleware</code> package, and supports all of
-its
-<a href="https://github.com/chimurai/http-proxy-middleware#options">configuration options</a>.</p>
+<p>The proxy is powered by the <code>http-proxy-middleware</code> package. See
+<a href="/docs/plugins/proxying">Proxying</a> for a full description of its configuration options.</p>
 <p>Internally at Spotify, the proxy option has been the overwhelmingly most popular
 choice for plugin makers. Since we have DNS based service discovery in place and
 a microservices framework that made it trivial to expose plain HTTP, it has been
