@@ -16,6 +16,7 @@
 
 import React from 'react';
 import { AsyncApiDefinitionWidget } from '../AsyncApiDefinitionWidget';
+import { GraphQlDefinitionWidget } from '../GraphQlDefinitionWidget';
 import { OpenApiDefinitionWidget } from '../OpenApiDefinitionWidget';
 import { PlainApiDefinitionWidget } from '../PlainApiDefinitionWidget';
 
@@ -31,6 +32,9 @@ export const ApiDefinitionWidget = ({ type, definition }: Props) => {
 
     case 'asyncapi':
       return <AsyncApiDefinitionWidget definition={definition} />;
+
+    case 'graphql':
+      return <GraphQlDefinitionWidget definition={definition} />;
 
     default:
       return (

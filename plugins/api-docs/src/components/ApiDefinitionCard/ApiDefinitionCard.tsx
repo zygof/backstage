@@ -16,9 +16,23 @@
 
 import { ApiEntity } from '@backstage/catalog-model';
 import { InfoCard } from '@backstage/core';
+import { BackstageTheme } from '@backstage/theme';
+import { makeStyles } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
 import React from 'react';
 import { ApiDefinitionWidget } from '../ApiDefinitionWidget';
-import { Alert } from '@material-ui/lab';
+
+const useStyles = makeStyles<BackstageTheme>(() => ({
+  root: {
+    height: '100%',
+    display: 'flex',
+    flexFlow: 'column nowrap',
+    margin: 0,
+  },
+  cardRoot: {
+    flex: '1 1 auto',
+  },
+}));
 
 type Props = {
   title?: string;
@@ -26,6 +40,8 @@ type Props = {
 };
 
 export const ApiDefinitionCard = ({ title, apiEntity }: Props) => {
+  const classes = useStyles();
+
   if (!apiEntity) {
     return (
       <InfoCard title={title}>
@@ -34,12 +50,17 @@ export const ApiDefinitionCard = ({ title, apiEntity }: Props) => {
     );
   }
 
+  const type = apiEntity.spec?.type || '';
+  const definition = apiEntity.spec?.definition || '';
+
   return (
-    <InfoCard title={title} subheader={apiEntity.spec.type}>
-      <ApiDefinitionWidget
-        type={apiEntity.spec.type}
-        definition={apiEntity.spec.definition}
-      />
+    <InfoCard
+      title={title}
+      subheader={type}
+      className={classes.root}
+      cardClassName={classes.cardRoot}
+    >
+      <ApiDefinitionWidget type={type} definition={definition} />
     </InfoCard>
   );
 };

@@ -123,7 +123,7 @@ export const ApiEntityPage = () => {
 
       {entity && (
         <>
-          <Content>
+          <Content noPadding>
             <ApiDefinitionCard apiEntity={entity as ApiEntity} />
           </Content>
         </>
