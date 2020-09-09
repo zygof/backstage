@@ -14,7 +14,7 @@
         </image>
         <copyright>Copyright © 2020 Spotify AB</copyright>
         <item>
-            <title><![CDATA[Announcing TechDocs: Spotify’s docs-like-code for Backstage]]></title>
+            <title><![CDATA[Announcing TechDocs: Spotify’s docs-like-code plugin for Backstage]]></title>
             <link>https://backstage.io/blog/2020/09/08/announcing-tech-docs.html</link>
             <guid>https://backstage.io/blog/2020/09/08/announcing-tech-docs.html</guid>
             <pubDate>Tue, 08 Sep 2020 06:00:00 GMT</pubDate>

@@ -9,7 +9,7 @@
     <logo>https://backstage.io/undefined</logo>
     <rights>Copyright © 2020 Spotify AB</rights>
     <entry>
-        <title type="html"><![CDATA[Announcing TechDocs: Spotify’s docs-like-code for Backstage]]></title>
+        <title type="html"><![CDATA[Announcing TechDocs: Spotify’s docs-like-code plugin for Backstage]]></title>
         <id>https://backstage.io/blog/2020/09/08/announcing-tech-docs.html</id>
         <link href="https://backstage.io/blog/2020/09/08/announcing-tech-docs.html"/>
         <updated>2020-09-08T06:00:00.000Z</updated>
