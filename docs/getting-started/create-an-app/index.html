@@ -70,7 +70,12 @@ need to run Backstage in your own environment.</p>
 <p>To create a Backstage app, you will need to have
 <a href="https://nodejs.org/en/download/">NodeJS</a> Active LTS Release installed
 (currently v12).</p>
-<p>With <code>npx</code>:</p>
+<p>Backstage provides a utility for creating new apps. It guides you through the
+initial setup of selecting the name of the app and a database for the backend.
+The database options are either SQLite or PostgreSQL, where the latter requires
+you to set up a separate database instance. If in doubt, choose SQLite, but
+don't worry about the choice, it's easy to change later!</p>
+<p>The easiest way to run the create app package is with <code>npx</code>:</p>
 <pre><code class="hljs css language-bash">npx @backstage/create-app
 </code></pre>
 <p>This will create a new Backstage App inside the current folder. The name of the
