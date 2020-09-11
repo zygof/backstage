@@ -31,7 +31,7 @@ import { Router as CatalogRouter } from '@backstage/plugin-catalog';
 import { Router as DocsRouter } from '@backstage/plugin-techdocs';
 import { Router as GraphiQLRouter } from '@backstage/plugin-graphiql';
 import { Router as TechRadarRouter } from '@backstage/plugin-tech-radar';
-import { Router as LighthouseRouter } from '@backstage/plugin-lighthouse';
+import { Router as LighthouseRouter, lighthouseApiRef } from '@backstage/plugin-lighthouse';
 import { Router as RegisterComponentRouter } from '@backstage/plugin-register-component';
 import { Route, Routes, Navigate } from 'react-router';
 
@@ -62,9 +62,10 @@ const catalogRouteRef = createRouteRef({
   path: '/catalog',
   title: 'Service Catalog',
 });
+<a href="localhost:3000/catalog/some-hacky-thing?subroute=builds/235246" />
 
 const AppRoutes = () => (
-  <Routes>
+  <BackstageRoutes>
     <Navigate key="/" to="/catalog" />
     <Route
       path={`${catalogRouteRef.path}/*`}
@@ -77,6 +78,29 @@ const AppRoutes = () => (
     />
     <Route path="/graphiql" element={<GraphiQLRouter />} />
     <Route path="/lighthouse/*" element={<LighthouseRouter />} />
+    <RefRoute path="/lighthouse/*" routeRef={lighthouseRootRouteRef} />
+    {/*
+    createPlugin({
+      exportedRoutes: {
+        'root': '/lighthouse'
+        'cicd': (entity) => `...`,
+      }
+    })
+
+    mount('lighthouse', )
+    `${get('lighthouse')/${lighthouseExportedFnForSubroute(entity)}}`
+    <RoutesContext overrides={{ 'lighthouse': '/cece' }}>
+
+    // in pluginB
+    import { pluginA } from '@internal/pluginA';
+    export PluginB = () => {
+      const path = useResolvedRoute(pluginA, p => p.routes.cicd(entity));
+      // ^ i dunno :) just want discoverable, simple, routes where pluginA
+      // only knows how to construct its own internal route segments, just
+      // like it defines its own relative shape
+    }
+    */}
+    <Route path="/web-audits" element={<LighthouseRouter />} />
     <Route
       path="/register-component"
       element={<RegisterComponentRouter catalogRouteRef={catalogRouteRef} />}
@@ -84,6 +108,23 @@ const AppRoutes = () => (
     {...deprecatedAppRoutes}
   </Routes>
 );
+
+// lighthouseApiRef.link() == /lighthouse
+// lighthouseApiRef.link() == /web-audits
+// lighthouseApiRef.link() == /?route-ref=/lighthouse
+<a href={lighthouseApiRef.link()}></a>
+
+const useRouterRefOverride = (routeRef) => {
+  const path = useRoutePath()
+  routeRef.override({path})
+}
+
+// pragma
+// React.createElement
+
+const LighthouseRouter = () => {
+  useRouterRefOverride(lighthouseApiRef)
+}
 
 const App: FC<{}> = () => (
   <AppProvider>

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { createPlugin, createRouteRef } from '@backstage/core';
-import { Experiment } from './components/Experiment6';
+import React from 'react';
 
-export const rootRouteRef = createRouteRef({ path: '', title: 'Explore' });
-export const plugin = createPlugin({
-  id: 'explore',
-  register({ router }) {
-    router.registerRoute('/*', Experiment);
-  },
-});
+console.log('I got loaded later!', performance.now());
+
+const LazyComponent = () => {
+  console.log('I got rendered later!', performance.now());
+  return <h2>I'm lazy</h2>;
+};
+
+export default LazyComponent;

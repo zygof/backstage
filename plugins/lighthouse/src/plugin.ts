@@ -22,6 +22,8 @@ import {
 } from '@backstage/core';
 import { lighthouseApiRef, LighthouseRestApi } from './api';
 
+// NOW
+
 export const rootRouteRef = createRouteRef({
   path: '',
   title: 'Lighthouse',
@@ -37,6 +39,89 @@ export const createAuditRouteRef = createRouteRef({
   title: 'Create Lighthouse Audit',
 });
 
+// ORIGINAL
+
+export const rootRouteRefOrig = createRouteRef({
+  path: '/lighthouse',
+  title: 'Lighthouse',
+});
+
+export const viewAuditRouteRefOrig = createRouteRef({
+  path: '/lighthouse/audit/:id',
+  title: 'View Lighthouse Audit',
+});
+
+export const createAuditRouteRefOrig = createRouteRef({
+  path: '/lighthouse/create-audit',
+  title: 'Create Lighthouse Audit',
+});
+
+// DESIRED
+
+export const rootRouteRefWant = createRouteRef({
+  path: '/lighthouse',
+  title: 'Lighthouse',
+});
+rootRouteRefWant.link()
+
+rootRouteRefWant.override({
+  path: '/website-audits'
+})
+
+// Subroutes are immutable
+export const viewAuditRouteRefWant = rootRouteRefWant.createSubRoute<{/** some desc */ id: number}>({
+  path: 'audit/:id',
+});
+viewAuditRouteRefWant.link({id: ':id'})
+
+<RefRoute routeRef={viewAuditRouteRefWant}/>
+
+
+resolvePath()
+
+export const createAuditRouteRefWant = rootRouteRefWant.createSubRoute({
+  path: 'create-audit',
+});
+
+// CATALOG
+
+export const catalogRootRouteRef = createRouteRef({
+  path: '/catalog',
+});
+
+export const entityRouteRef = catalogRootRouteRef.createSubRoute({
+  path: ':entity'
+})
+
+// other plugin
+
+export const gitActionsRouteRef = entityRouteRef.createSubRoute({
+  path: 'github-actions'
+})
+
+export const gitActionsRouteRef = createRouteRef({
+  relativeTo: entityRouteRef,
+  path: '/github-actions',
+});
+
+
+
+// Nav targets can have default icon and titles to display when linking to them
+export const deploymentsListNav = createNavTarget({
+  path: '/deployments',
+  icon: DeplyomentsIcon,
+  title: 'Deployments',
+})
+
+// Params are added as type parameters to the target
+export const deploymentNav = createNavTarget<string>({
+  relativeTo: deploymentsListNav, // Relative to other nav targets? ¯\_(ツ)_/¯
+  path: '/:name',
+  icon: DeplyomentsIcon,
+  // Titles can be generated based on params
+  title: ({ params: [name] }) => `Deployment - ${name}`,
+})
+
 export const plugin = createPlugin({
   id: 'lighthouse',
   apis: [
@@ -47,3 +132,19 @@ export const plugin = createPlugin({
     }),
   ],
 });
+
+
+
+/*
+
+1. Work on the RouteRefs API improvement
+1.1 .createSubRoute
+1.2 Typed params (with named params first)
+1.3
+2. Create RefRoute component that accepts a routeRef
+
+Considerations:
+  Analytics - get the raw route in analytics event, with named parameters?
+  Dynamic loading - What needs to be available at boot, what can be deferred to dynamic loads?
+
+*/

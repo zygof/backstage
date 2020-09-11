@@ -78,6 +78,11 @@ const ServiceEntityPage = ({ entity }: { entity: Entity }) => (
       element={<SentryRouter entity={entity} />}
     />
     <EntityPageLayout.Content
+      path="/api-status"
+      title="Status"
+      element={<StatusRouter entity={entity} />}
+    />
+    <EntityPageLayout.Content
       path="/api/*"
       title="API"
       element={<ApiDocsRouter entity={entity} />}
@@ -129,14 +134,94 @@ const DefaultEntityPage = ({ entity }: { entity: Entity }) => (
   </EntityPageLayout>
 );
 
+/*
+export function Route({
+  element = <Outlet />
+}: RouteProps): React.ReactElement | null {
+  return element;
+}
+*/
+
 export const EntityPage = () => {
-  const { entity } = useEntity();
-  switch (entity?.spec?.type) {
-    case 'service':
-      return <ServiceEntityPage entity={entity} />;
-    case 'website':
-      return <WebsiteEntityPage entity={entity} />;
-    default:
-      return <DefaultEntityPage entity={entity} />;
-  }
+  return (
+    <Routes>
+      <RefRoute
+        path="/service"
+        routeRef={<ServiceEntityPage entity={entity} />}
+      />
+      <RefRoute
+        path="/website"
+        routeRef={<WebsiteEntityPage entity={entity} />}
+      />
+      <RefRoute
+        path="/:derp"
+        routeRef={<DefaultEntityPage entity={entity} />}
+      />
+    </Routes>
+  );
+  // const { entity } = useEntity();
+  // switch (entity?.spec?.type) {
+  //   case 'service':
+  //     return <ServiceEntityPage entity={entity} />;
+  //   case 'website':
+  //     return <WebsiteEntityPage entity={entity} />;
+  //   default:
+  //     return <DefaultEntityPage entity={entity} />;
+  // }
 };
+
+//AppRouter.tsx
+import PluginRouter from 'plugin';
+
+export default (
+  <Routes>
+    <PluginRouter path="/my-plugin" />
+  </Routes>
+);
+// plugin/router.tsx
+export default (
+  <Routes>
+    <Route></Route>
+  </Routes>
+);
+
+const RoutesStructure = (
+  <>
+    <Route />
+    <Route />
+    <Route>
+      <Route />
+      <Route>
+        <Route />
+      </Route>
+    </Route>
+  </>
+);
+
+// App
+
+const routingTable = [
+  {
+    refs: [componentsRouteRef],
+    path: '/components',
+  },
+  {
+    refs: [componentsRouteRef, statusPageRouteRef],
+    path: '/status',
+  },
+  {
+    refs: [apiDocsRouteRef],
+    path: '/apis',
+  },
+  {
+    refs: [apiDocsRouteRef, statusPageRouteRef],
+    path: '/api-status',
+  },
+];
+
+// Plugins
+
+useLink(catalogRouteRef); // /catalog
+useLink(catalogRouteRef, statusPageRouteRef); // /catalog/status
+useLink(apiDocsRouteRef); // /apis
+useLink(apiDocsRouteRef, statusPageRouteRef); // /apis/api-status
