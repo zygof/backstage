@@ -170,20 +170,54 @@ export const EntityPage = () => {
   // }
 };
 
-//AppRouter.tsx
-import PluginRouter from 'plugin';
+//@ts-ignore
 
 export default (
-  <Routes>
-    <PluginRouter path="/my-plugin" />
-  </Routes>
+  <BackstageRoutes>
+    <Navigate key="/" to="/catalog" />
+    <CatalogRouter path="/catalog">
+      <EntityPage path="/service">
+        <OverviewContent path="/">
+          <WidgetA />
+          <WidgetB />
+        </OverviewContent>
+        <CICDSwitcher path="/ci-cd" />
+        <StatusRouter path="/api-status" />
+        <ApiDocsRouter path="/api" />
+        <DocsRouter path="/docs" />
+      </EntityPage>
+
+      <EntityPage path="/website">
+        <OverviewContent path="/">
+          <WidgetA />
+          <WidgetB />
+        </OverviewContent>
+        <CICDSwitcher path="/ci-cd" />
+        <SentryRouter path="/sentry" />
+        <DocsRouter path="/docs" />
+      </EntityPage>
+
+      <EntityPage path="/:other">
+        <OverviewContent path="/">
+          <WidgetA />
+          <WidgetB />
+        </OverviewContent>
+        <DocsRouter path="/docs" />
+      </EntityPage>
+    </CatalogRouter>
+    <DocsRouter path="/docs" />
+    <TechRadarRouter path="/tech-radar" width={1500} height={800} />
+    <GraphiQLRouter path="/graphiql" />
+    <LighthouseRouter path="/lighthouse" />
+  </BackstageRoutes>
 );
+
 // plugin/router.tsx
-export default (
-  <Routes>
-    <Route></Route>
-  </Routes>
-);
+// export default (
+//   <Routes>
+//     <Route></Route>
+//   </Routes>
+// );
 
 const RoutesStructure = (
   <>
