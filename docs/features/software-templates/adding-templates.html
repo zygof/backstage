@@ -131,14 +131,14 @@ to be ingested from any source, for example:</p>
 running:</p>
 <pre><code class="hljs css language-sh">curl \
   --location \
-  --request POST <span class="hljs-string">'localhost:7000/catalog/locations'</span> \
+  --request POST <span class="hljs-string">'localhost:7000/api/catalog/locations'</span> \
   --header <span class="hljs-string">'Content-Type: application/json'</span> \
   --data-raw <span class="hljs-string">"{\"type\": \"file\", \"target\": \"<span class="hljs-variable">${YOUR PATH HERE}</span>/template.yaml\"}"</span>
 </code></pre>
 <p>If loading from a Git location, you can run the following</p>
 <pre><code class="hljs css language-sh">curl \
   --location \
-  --request POST <span class="hljs-string">'localhost:7000/catalog/locations'</span> \
+  --request POST <span class="hljs-string">'localhost:7000/api/catalog/locations'</span> \
   --header <span class="hljs-string">'Content-Type: application/json'</span> \
   --data-raw <span class="hljs-string">"{\"type\": \"github\", \"target\": \"https://<span class="hljs-variable">${YOUR GITHUB REPO}</span>blob/master/<span class="hljs-variable">${PATH TO FOLDER}</span>/template.yaml\"}"</span>
 </code></pre>
