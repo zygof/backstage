@@ -20,32 +20,26 @@ parts of Backstage too.</p>
   <span class="hljs-attr">github:</span>
     <span class="hljs-bullet">-</span> <span class="hljs-attr">host:</span> <span class="hljs-string">github.com</span>
       <span class="hljs-attr">token:</span>
-        <span class="hljs-string">$secret:</span>
-          <span class="hljs-attr">env:</span> <span class="hljs-string">GITHUB_TOKEN</span>
+        <span class="hljs-string">$env:</span> <span class="hljs-string">GITHUB_TOKEN</span>
     <span class="hljs-bullet">-</span> <span class="hljs-attr">host:</span> <span class="hljs-string">ghe.example.net</span>
       <span class="hljs-attr">apiBaseUrl:</span> <span class="hljs-string">https://ghe.example.net/api/v3</span>
       <span class="hljs-attr">rawBaseUrl:</span> <span class="hljs-string">https://ghe.example.net/raw</span>
       <span class="hljs-attr">token:</span>
-        <span class="hljs-string">$secret:</span>
-          <span class="hljs-attr">env:</span> <span class="hljs-string">GHE_TOKEN</span>
+        <span class="hljs-string">$env:</span> <span class="hljs-string">GHE_TOKEN</span>
   <span class="hljs-attr">gitlab:</span>
     <span class="hljs-bullet">-</span> <span class="hljs-attr">host:</span> <span class="hljs-string">gitlab.com</span>
       <span class="hljs-attr">token:</span>
-        <span class="hljs-string">$secret:</span>
-          <span class="hljs-attr">env:</span> <span class="hljs-string">GITLAB_TOKEN</span>
+        <span class="hljs-string">$env:</span> <span class="hljs-string">GITLAB_TOKEN</span>
   <span class="hljs-attr">bitbucket:</span>
     <span class="hljs-bullet">-</span> <span class="hljs-attr">host:</span> <span class="hljs-string">bitbucket.org</span>
       <span class="hljs-attr">username:</span>
-        <span class="hljs-string">$secret:</span>
-          <span class="hljs-attr">env:</span> <span class="hljs-string">BITBUCKET_USERNAME</span>
+        <span class="hljs-string">$env:</span> <span class="hljs-string">BITBUCKET_USERNAME</span>
       <span class="hljs-attr">appPassword:</span>
-        <span class="hljs-string">$secret:</span>
-          <span class="hljs-attr">env:</span> <span class="hljs-string">BITBUCKET_APP_PASSWORD</span>
+        <span class="hljs-string">$env:</span> <span class="hljs-string">BITBUCKET_APP_PASSWORD</span>
   <span class="hljs-attr">azure:</span>
     <span class="hljs-bullet">-</span> <span class="hljs-attr">host:</span> <span class="hljs-string">dev.azure.com</span>
       <span class="hljs-attr">token:</span>
-        <span class="hljs-string">$secret:</span>
-          <span class="hljs-attr">env:</span> <span class="hljs-string">AZURE_TOKEN</span>
+        <span class="hljs-string">$env:</span> <span class="hljs-string">AZURE_TOKEN</span>
 </code></pre>
 <p>Each key under <code>integrations</code> is a separate configuration for each external
 provider. The providers each have their own configuration, so let's look at the
