@@ -62,12 +62,135 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/backstage/backstage/edit/master/docs/features/software-catalog/external-integrations.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">External integrations</h1></header><article><div><span><p>Backstage natively supports storing software components in
-<a href="/docs/features/software-catalog/descriptor-format">metadata YAML files</a>. However, companies that already
-have an existing system for keeping track of software and its owners can
-integrate such systems with Backstage.</p>
-<p>TODO: Describe the API contract.</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/features/software-catalog/extending-the-model"><span class="arrow-prev">← </span><span>Extending the model</span></a><a class="docs-next button" href="/docs/features/software-catalog/software-catalog-api"><span>API</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><div class="footer-title"><a href="/"><h2 class="footerLogo"></h2></a></div><div><h5>Docs</h5><a href="/docs/overview/what-is-backstage">What is Backstage?</a><a href="/docs/getting-started/">Getting started</a><a href="/docs/features/software-catalog/software-catalog-overview">Service Catalog</a><a href="/docs/plugins/create-a-plugin">Create a Plugin</a><a href="/docs/dls/design">Designing for Backstage</a></div><div><h5>Community</h5><a href="https://discord.gg/MUpMjP2">Support chatroom</a><a href="https://github.com/backstage/backstage/blob/master/CONTRIBUTING.md">Contributing</a><a href="https://mailchi.mp/spotify/backstage-community">Subscribe to our newsletter</a><a href="https://www.cncf.io/sandbox-projects/">CNCF Sandbox</a></div><div><h5>More</h5><a href="https://spotify.github.io/">Open Source @ Spotify</a><a href="https://github.com/backstage/backstage">GitHub</a><a class="github-button" href="https://github.com/backstage/backstage" data-icon="octicon-star" data-count-href="/backstage/backstage/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="https://twitter.com/SpotifyEng" class="twitter-follow-button">Follow @SpotifyEng</a></div></div></section><p class="copyright">Copyright © 2020 Backstage Project Authors. All rights reserved. The Linux Foundation has registered trademarks and uses trademarks. For a list of trademarks of The Linux Foundation, please see our Trademark Usage page: https://www.linuxfoundation.org/trademark-usage</p></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script><script>
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/backstage/backstage/edit/master/docs/features/software-catalog/external-integrations.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">External integrations</h1></header><article><div><span><p>Backstage natively supports importing catalog data through the use of
+<a href="/docs/features/software-catalog/descriptor-format">entity descriptor YAML files</a>. However, companies that
+already have an existing system for keeping track of software and its owners can
+leverage those systems by integrating them with Backstage. This article shows
+the most common way of doing that integration: by adding a custom catalog
+<em>processor</em>.</p>
+<h2><a class="anchor" aria-hidden="true" id="background"></a><a href="#background" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Background</h2>
+<p>The catalog has a frontend plugin part, that communicates via a service API to
+the backend plugin part. The backend has a processing loop that repeatedly
+ingests data from the sources you specify, to store them in its database.</p>
+<p>As a Backstage adopter, you would be able to customize or extend the catalog in
+several ways - by replacing the entire backend API, or by replacing entire
+implementation classes at certain points in the backend, or by leveraging the
+ingestion process to fetch data from your own authoritative source. Each method
+has benefits and drawbacks, but this article will focus on the last one of the
+above. It is the one that is the most straight forward and future proof, and
+leverages a lot of benefits that come with the builtin catalog.</p>
+<h2><a class="anchor" aria-hidden="true" id="processors-and-the-ingestion-loop"></a><a href="#processors-and-the-ingestion-loop" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Processors and the Ingestion Loop</h2>
+<p>The catalog holds a number of registered locations, that were added either by
+site admins or by individual Backstage users. Their purpose is to reference some
+sort of data that the catalog shall keep itself up to date with. Each location
+has a <code>type</code>, and a <code>target</code> that are both strings.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-comment"># Example location</span>
+<span class="hljs-attr">type:</span> <span class="hljs-string">url</span>
+<span class="hljs-attr">target:</span> <span class="hljs-string">https://github.com/backstage/backstage/blob/master/catalog-info.yaml</span>
+</code></pre>
+<p>The builtin catalog backend has an ingestion loop that periodically goes through
+all of these registered locations, and pushes them and their resulting output
+through the list of <em>processors</em>.</p>
+<p>Processors are classes that the site admin has registered with the catalog at
+startup. They are at the heart of all catalog logic, and have the ability to
+read the contents of locations, modify in-flight entities that were read out of
+a location, perform validation, and more. The catalog comes with a set of
+builtin processors, that have the ability to read from a list of well known
+location types, to perform the basic processing needs, etc, but more can be
+added by the organization that adopts Backstage.</p>
+<p>We will now show the process of creating a new processor and location type,
+which enables the ingestion of catalog data from an existing external API.</p>
+<h2><a class="anchor" aria-hidden="true" id="deciding-on-the-new-locations"></a><a href="#deciding-on-the-new-locations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Deciding on the New Locations</h2>
+<p>The first step is to decide how we want to point at the system that holds our
+data. Let's assume that it is internally named System-X and can be reached
+through HTTP REST calls to its API.</p>
+<p>Let's decide that our locations shall take the following form:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">type:</span> <span class="hljs-string">system-x</span>
+<span class="hljs-attr">target:</span> <span class="hljs-string">http://systemx.services.example.net/api/v2</span>
+</code></pre>
+<p>It got its own made-up <code>type</code>, and the <code>target</code> conveniently points to the
+actual API endpoint to talk to.</p>
+<p>So now we have to make the catalog aware of such a location so that it can start
+feeding it into the ingestion loop. For this kind of an integration, you'd
+typically want to add it to the list of statically always-available locations in
+the config.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-comment"># In app-config.yaml</span>
+<span class="hljs-attr">catalog:</span>
+  <span class="hljs-attr">locations:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">type:</span> <span class="hljs-string">system-x</span>
+      <span class="hljs-attr">target:</span> <span class="hljs-string">http://systemx.services.example.net/api/v2</span>
+</code></pre>
+<p>If you start up the backend now, it will start to periodically say that it could
+not find a processor that supports that location. So let's make a processor that
+does so!</p>
+<h2><a class="anchor" aria-hidden="true" id="creating-a-catalog-data-reader-processor"></a><a href="#creating-a-catalog-data-reader-processor" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Creating a Catalog Data Reader Processor</h2>
+<p>The recommended way of instantiating the catalog backend classes is to use the
+<a href="https://github.com/backstage/backstage/blob/master/plugins/catalog-backend/src/service/CatalogBuilder.ts"><code>CatalogBuilder</code></a>,
+as illustrated in the
+<a href="https://github.com/backstage/backstage/blob/master/packages/backend/src/plugins/catalog.ts">example backend here</a>.
+We will create a new
+<a href="https://github.com/backstage/backstage/blob/master/plugins/catalog-backend/src/ingestion/types.ts"><code>CatalogProcessor</code></a>
+subclass that can be added to this catalog builder.</p>
+<p>It is up to you where you put the code for this new processor class. For quick
+experimentation you could place it in your backend package, but we recommend
+putting all extensions like this in a backend plugin package of their own in the
+<code>plugins</code> folder of your Backstage repo.</p>
+<p>The class will have this basic structure:</p>
+<pre><code class="hljs css language-ts"><span class="hljs-keyword">import</span> { UrlReader } <span class="hljs-keyword">from</span> <span class="hljs-string">'@backstage/backend-common'</span>;
+<span class="hljs-keyword">import</span> { LocationSpec } <span class="hljs-keyword">from</span> <span class="hljs-string">'@backstage/catalog-model'</span>;
+<span class="hljs-keyword">import</span> {
+  results,
+  CatalogProcessor,
+  CatalogProcessorEmit,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@backstage/plugin-catalog-backend'</span>;
+
+<span class="hljs-comment">// A processor that reads from the fictional System-X</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> SystemXReaderProcessor <span class="hljs-keyword">implements</span> CatalogProcessor {
+  <span class="hljs-keyword">constructor</span>(<span class="hljs-params"><span class="hljs-keyword">private</span> readonly reader: UrlReader</span>) {}
+
+  <span class="hljs-keyword">async</span> readLocation(
+    location: LocationSpec,
+    _optional: <span class="hljs-built_in">boolean</span>,
+    emit: CatalogProcessorEmit,
+  ): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">boolean</span>&gt; {
+    <span class="hljs-comment">// Pick a custom location type string. A location will be</span>
+    <span class="hljs-comment">// registered later with this type.</span>
+    <span class="hljs-keyword">if</span> (location.type !== <span class="hljs-string">'system-x'</span>) {
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-comment">// Use the builtin reader facility to grab data from the</span>
+      <span class="hljs-comment">// API. If you prefer, you can just use plain fetch here</span>
+      <span class="hljs-comment">// (from the cross-fetch package), or any other method of</span>
+      <span class="hljs-comment">// your choosing.</span>
+      <span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> <span class="hljs-keyword">this</span>.reader.read(location.target);
+      <span class="hljs-keyword">const</span> json = <span class="hljs-built_in">JSON</span>.parse(data.toString());
+      <span class="hljs-comment">// Repeatedly call emit(results.entity(location, &lt;entity&gt;))</span>
+    } <span class="hljs-keyword">catch</span> (error) {
+      <span class="hljs-keyword">const</span> message = <span class="hljs-string">`Unable to read <span class="hljs-subst">${location.<span class="hljs-keyword">type</span>}</span>, <span class="hljs-subst">${error}</span>`</span>;
+      emit(results.generalError(location, message));
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+  }
+}
+</code></pre>
+<p>The key points to note are:</p>
+<ul>
+<li>Make a class that implements <code>CatalogProcessor</code></li>
+<li>Only act on location types that you care about, and leave the rest alone by
+returning <code>false</code></li>
+<li>Read the data from the external system in any way you see fit. Use the
+location <code>target</code> field if you designed it as mentioned above</li>
+<li>Call <code>emit</code> any number of times with the results of that process</li>
+<li>Finally return <code>true</code></li>
+</ul>
+<p>You should now be able to instantiate this class in your backend, and add it to
+the <code>CatalogBuilder</code> using the <code>addProcessors</code> method.</p>
+<p>Start up the backend - it should now start reading from the previously
+registered location and you'll see your entities start to appear in Backstage.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/features/software-catalog/extending-the-model"><span class="arrow-prev">← </span><span>Extending the model</span></a><a class="docs-next button" href="/docs/features/software-catalog/software-catalog-api"><span>API</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#background">Background</a></li><li><a href="#processors-and-the-ingestion-loop">Processors and the Ingestion Loop</a></li><li><a href="#deciding-on-the-new-locations">Deciding on the New Locations</a></li><li><a href="#creating-a-catalog-data-reader-processor">Creating a Catalog Data Reader Processor</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><div class="footer-title"><a href="/"><h2 class="footerLogo"></h2></a></div><div><h5>Docs</h5><a href="/docs/overview/what-is-backstage">What is Backstage?</a><a href="/docs/getting-started/">Getting started</a><a href="/docs/features/software-catalog/software-catalog-overview">Service Catalog</a><a href="/docs/plugins/create-a-plugin">Create a Plugin</a><a href="/docs/dls/design">Designing for Backstage</a></div><div><h5>Community</h5><a href="https://discord.gg/MUpMjP2">Support chatroom</a><a href="https://github.com/backstage/backstage/blob/master/CONTRIBUTING.md">Contributing</a><a href="https://mailchi.mp/spotify/backstage-community">Subscribe to our newsletter</a><a href="https://www.cncf.io/sandbox-projects/">CNCF Sandbox</a></div><div><h5>More</h5><a href="https://spotify.github.io/">Open Source @ Spotify</a><a href="https://github.com/backstage/backstage">GitHub</a><a class="github-button" href="https://github.com/backstage/backstage" data-icon="octicon-star" data-count-href="/backstage/backstage/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="https://twitter.com/SpotifyEng" class="twitter-follow-button">Follow @SpotifyEng</a></div></div></section><p class="copyright">Copyright © 2020 Backstage Project Authors. All rights reserved. The Linux Foundation has registered trademarks and uses trademarks. For a list of trademarks of The Linux Foundation, please see our Trademark Usage page: https://www.linuxfoundation.org/trademark-usage</p></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
