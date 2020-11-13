@@ -67,7 +67,7 @@
 possible residing within the plugin itself and its backend APIs. There will
 however always be a need for plugins to communicate outside of its boundaries,
 both with other plugins and the app itself.</p>
-<p>Backstage provides two primary methods for plugins to communication across their
+<p>Backstage provides two primary methods for plugins to communicate across their
 boundaries in client-side code. The first one being the <code>createPlugin</code> API and
 the registration hooks passed to the <code>register</code> method, and the second one being
 Utility APIs. While the <code>createPlugin</code> API is focused on the initialization
@@ -208,8 +208,8 @@ implement the <code>ErrorApi</code>, as it is checked by the type embedded in th
 interface for the API, and create an <code>ApiRef</code> using <code>createApiRef</code> exported from
 <code>@backstage/core</code>. Also be sure to provide at least one implementation of the
 API, and to declare a default factory for the API in <code>createPlugin</code>.</p>
-<p>Custom Utility APIs can be either public or private, which it is up to the
-plugin to choose. Private APIs do not expose an external API surface, and it's
+<p>Custom Utility APIs can be either public or private, which is up to the plugin
+to choose. Private APIs do not expose an external API surface, and it's
 therefore possible to make breaking changes to the API without affecting other
 users of the plugin. If an API is made public however, it opens up for other
 plugins to make use of the API, and it also makes it possible for users for your
@@ -248,7 +248,7 @@ they want.</p>
 <p>The current method for connecting Utility API providers and consumers is via the
 React tree using an <code>ApiProvider</code>, which is added to the <code>AppProvider</code> of the
 <code>App</code>. In the future there may potentially be more ways to do this, in ways that
-are not tied to react. A design goal of the Utility APIs was to not have them
+are not tied to React. A design goal of the Utility APIs was to not have them
 directly tied to React.</p>
 <p>The indirection provided by Utility APIs also makes it straightforward to test
 components that depend on APIs, and to provide a standard common development
