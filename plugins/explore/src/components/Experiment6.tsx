@@ -303,9 +303,9 @@ const anchorComponent = (routeRef: RouteRef, Component: ComponentType) => {
   };
 };
 
-const useResolvedRouteRefLinkThisIsInternal = (...routeRefs: RouteRef[]) {
+// const useResolvedRouteRefLinkThisIsInternal = (...routeRefs: RouteRef[]) {
 
-}
+// }
 
 const useLink = (routeRef: RouteRef) => {
   const parentRouteRefs = useContext(RouteContext)
