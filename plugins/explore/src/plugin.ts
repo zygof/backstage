@@ -15,7 +15,7 @@
  */
 
 import { createPlugin, createRouteRef } from '@backstage/core';
-import { Experiment } from './components/Experiment9';
+import { Experiment } from './components/Experiment11';
 
 export const rootRouteRef = createRouteRef({ path: '', title: 'Explore' });
 export const plugin = createPlugin({
