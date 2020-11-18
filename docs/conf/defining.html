@@ -62,16 +62,96 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/backstage/backstage/edit/master/docs/conf/defining.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Defining Configuration for your Plugin</h1></header><article><div><span><p>There is currently no tooling support or helpers for defining plugin
-configuration. But it's on the roadmap.</p>
-<p>Meanwhile, document the config values that you are reading in your plugin
-README.</p>
-<h2><a class="anchor" aria-hidden="true" id="format"></a><a href="#format" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Format</h2>
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/backstage/backstage/edit/master/docs/conf/defining.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Defining Configuration for your Plugin</h1></header><article><div><span><p>Configuration in Backstage is organized via a configuration schema, which in
+turn is defined using a superset of
+<a href="https://json-schema.org/specification-links.html#draft-7">JSON Schema Draft-07</a>.
+Each plugin or package within a Backstage app can contribute to the schema,
+which during validation is stitched together into a single schema.</p>
+<h2><a class="anchor" aria-hidden="true" id="schema-collection-and-definition"></a><a href="#schema-collection-and-definition" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Schema Collection and Definition</h2>
+<p>Schemas are collected from all packages and dependencies in each repo that are a
+part of the Backstage ecosystem, including transitive dependencies. The current
+definition of &quot;part of the ecosystem&quot; is that a package has at least one
+dependency in the <code>@backstage</code> namespace, but this is subject to change.</p>
+<p>Each package is searched for a schema at a single point of entry, a top-level
+<code>&quot;configSchema&quot;</code> field in <code>package.json</code>. The field can either contain an
+inlined JSON schema, or a relative path to a schema file. Supported schema file
+formats are <code>.json</code> or <code>.d.ts</code>.</p>
+<blockquote>
+<p>When defining a schema file, be sure to include the file in your
+<code>package.json</code> &gt; <code>&quot;files&quot;</code> field as well!</p>
+</blockquote>
+<p>TypeScript configuration schema files should export a single <code>Config</code> type, for
+example:</p>
+<pre><code class="hljs css language-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> Config {
+  app: {
+    <span class="hljs-comment">/**
+     * Frontend root URL
+     * @visibility frontend
+     */</span>
+    baseUrl: <span class="hljs-built_in">string</span>;
+  };
+}
+</code></pre>
+<p>Separate <code>.json</code> schema files can use a top-level
+<code>&quot;$schema&quot;: &quot;https://backstage.io/schema/config-v1&quot;</code> declaration in order to
+receive schema validation and autocompletion. For example:</p>
+<pre><code class="hljs css language-json">{
+  <span class="hljs-attr">"$schema"</span>: <span class="hljs-string">"https://backstage.io/schema/config-v1"</span>,
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"object"</span>,
+  <span class="hljs-attr">"properties"</span>: {
+    <span class="hljs-attr">"app"</span>: {
+      <span class="hljs-attr">"type"</span>: <span class="hljs-string">"object"</span>,
+      <span class="hljs-attr">"properties"</span>: {
+        <span class="hljs-attr">"baseUrl"</span>: {
+          <span class="hljs-attr">"type"</span>: <span class="hljs-string">"string"</span>,
+          <span class="hljs-attr">"description"</span>: <span class="hljs-string">"Frontend root URL"</span>,
+          <span class="hljs-attr">"visibility"</span>: <span class="hljs-string">"frontend"</span>
+        }
+      },
+      <span class="hljs-attr">"required"</span>: [<span class="hljs-string">"baseUrl"</span>]
+    },
+    <span class="hljs-attr">"required"</span>: [<span class="hljs-string">"app"</span>]
+  }
+}
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="visibility"></a><a href="#visibility" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Visibility</h2>
+<p>The <code>https://backstage.io/schema/config-v1</code> meta schema is a superset of JSON
+Schema Draft 07. The single addition is a custom <code>visibility</code> keyword, which is
+used to indicate whether the given config value should be visible in the
+frontend or not. The possible values are <code>frontend</code>, <code>backend</code>, and <code>secret</code>,
+where <code>backend</code> is the default. A visibility of <code>secret</code> has the same scope at
+runtime, but it will be treated with more care in certain contexts, and defining
+both <code>frontend</code> and <code>secret</code> for the same value in two different schemas will
+result in an error during schema merging.</p>
+<p>The visibility only applies to the direct parent of where the keyword is placed
+in the schema. For example, if you set the visibility to <code>frontend</code> for a subset
+of the schema with <code>type: &quot;object&quot;</code>, but none of the descendants, only an empty
+object will be available in the frontend. The full ancestry does not need to
+have correctly defined visibilities however, so it is enough to only for example
+declare the visibility of a leaf node of <code>type: &quot;string&quot;</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="validation"></a><a href="#validation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Validation</h2>
+<p>Schemas can be validated using the <code>backstage-cli config:check</code> command. If you
+want to validate anything else than the default <code>app-config.yaml</code>, be sure to
+pass in all of the configuration files as <code>--config &lt;path&gt;</code> options as well.</p>
+<p>To validate and examine the frontend configuration, use the
+<code>backstage-cli config:print --frontend</code> command. Just like for validation you
+may need to pass in all files using one or multiple <code>--config &lt;path&gt;</code> options.</p>
+<h2><a class="anchor" aria-hidden="true" id="guidelines"></a><a href="#guidelines" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Guidelines</h2>
+<blockquote>
+<p>Make limited use of static configuration. The first question to ask is whether
+a particular option actually needs to be static configuration, or if it might
+just as well be a TypeScript API. In general, options that you want to be able
+to change for different deployment environments should be static
+configuration, while it should otherwise be avoided.</p>
+</blockquote>
 <p>When defining configuration for your plugin, keep keys camelCased and stick to
-existing casing conventions such as <code>baseUrl</code>.</p>
+existing casing conventions such as <code>baseUrl</code> rather than <code>baseURL</code>.</p>
 <p>It is also usually best to prefer objects over arrays, as it makes it possible
 to override individual values using separate files or environment variables.</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/conf/writing"><span class="arrow-prev">← </span><span>Writing Backstage Configuration Files</span></a><a class="docs-next button" href="/docs/auth/index"><span>User Authentication and Authorization in Backstage</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#format">Format</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><div class="footer-title"><a href="/"><h2 class="footerLogo"></h2></a></div><div><h5>Docs</h5><a href="/docs/overview/what-is-backstage">What is Backstage?</a><a href="/docs/getting-started/">Getting started</a><a href="/docs/features/software-catalog/software-catalog-overview">Service Catalog</a><a href="/docs/plugins/create-a-plugin">Create a Plugin</a><a href="/docs/dls/design">Designing for Backstage</a></div><div><h5>Community</h5><a href="https://discord.gg/MUpMjP2">Support chatroom</a><a href="https://github.com/backstage/backstage/blob/master/CONTRIBUTING.md">Contributing</a><a href="https://mailchi.mp/spotify/backstage-community">Subscribe to our newsletter</a><a href="https://www.cncf.io/sandbox-projects/">CNCF Sandbox</a></div><div><h5>More</h5><a href="https://spotify.github.io/">Open Source @ Spotify</a><a href="https://github.com/backstage/backstage">GitHub</a><a class="github-button" href="https://github.com/backstage/backstage" data-icon="octicon-star" data-count-href="/backstage/backstage/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="https://twitter.com/SpotifyEng" class="twitter-follow-button">Follow @SpotifyEng</a></div></div></section><p class="copyright">Copyright © 2020 Backstage Project Authors. All rights reserved. The Linux Foundation has registered trademarks and uses trademarks. For a list of trademarks of The Linux Foundation, please see our Trademark Usage page: https://www.linuxfoundation.org/trademark-usage</p></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script><script>
+<p>Avoid creating new top-level fields as much as possible. Either place your
+configuration within an existing known top-level block, or create a single new
+one using e.g. the name of the product that the plugin integrates.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/conf/writing"><span class="arrow-prev">← </span><span>Writing Backstage Configuration Files</span></a><a class="docs-next button" href="/docs/auth/index"><span>User Authentication and Authorization in Backstage</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#schema-collection-and-definition">Schema Collection and Definition</a></li><li><a href="#visibility">Visibility</a></li><li><a href="#validation">Validation</a></li><li><a href="#guidelines">Guidelines</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><div class="footer-title"><a href="/"><h2 class="footerLogo"></h2></a></div><div><h5>Docs</h5><a href="/docs/overview/what-is-backstage">What is Backstage?</a><a href="/docs/getting-started/">Getting started</a><a href="/docs/features/software-catalog/software-catalog-overview">Service Catalog</a><a href="/docs/plugins/create-a-plugin">Create a Plugin</a><a href="/docs/dls/design">Designing for Backstage</a></div><div><h5>Community</h5><a href="https://discord.gg/MUpMjP2">Support chatroom</a><a href="https://github.com/backstage/backstage/blob/master/CONTRIBUTING.md">Contributing</a><a href="https://mailchi.mp/spotify/backstage-community">Subscribe to our newsletter</a><a href="https://www.cncf.io/sandbox-projects/">CNCF Sandbox</a></div><div><h5>More</h5><a href="https://spotify.github.io/">Open Source @ Spotify</a><a href="https://github.com/backstage/backstage">GitHub</a><a class="github-button" href="https://github.com/backstage/backstage" data-icon="octicon-star" data-count-href="/backstage/backstage/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="https://twitter.com/SpotifyEng" class="twitter-follow-button">Follow @SpotifyEng</a></div></div></section><p class="copyright">Copyright © 2020 Backstage Project Authors. All rights reserved. The Linux Foundation has registered trademarks and uses trademarks. For a list of trademarks of The Linux Foundation, please see our Trademark Usage page: https://www.linuxfoundation.org/trademark-usage</p></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
