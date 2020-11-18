@@ -96,7 +96,7 @@ const catalogPlugin = createPlugin({
   id: 'catalog',
   producesRoutes: {
     catalog: createRouteRef(),
-    entity: createRouteRef(), // <-- what about params kind,namespace,name
+    entity: createRouteRef({ id: 'catalog.entity' }), // <-- what about params kind,namespace,name
   },
 });
 
@@ -112,12 +112,32 @@ const tinglePlugin = createPlugin({
   producesRoutes: {
     ownedBuilds: createRouteRef(),
     entityBuilds: createRouteRef(), // entityRef?
-    build: createRouteRef(), // buildId
+    build: createRouteRef({ params: ['buildId'] }), // buildId
   },
   consumesRoutes: {
-    entity: createRouteRef(), // should be bound to the catalog
+    entity: createConsumedRouteRef({ id: 'catalog.entity' }), // should be bound to the catalog
   },
 });
+
+/*
+
+/entity/:kind/:namespace/:name/builds/:buildId
+
+
+/entity/:kind/:namespace/:name <- catalogPlugin.routes.entity
+
+/builds/:buildId <- tinglePlugin.routes.build
+
+*/
+
+const concreteBuildPageRouteRef = createConcreteRouteRef(
+  catalogPlugin.routes.entity,
+  tinglePlugin.routes.build,
+);
+
+const buildsPageHref = app.createConcreteLink(
+  concreteBuildPageRouteRef.build([{ kind: 'asd' }, { buildId: 'asdasd' }]),
+);
 
 const OwnedBuildsPage = () => {
   const { user } = useApi(identityApiRef);
@@ -144,7 +164,6 @@ const EntityBuildsPage = () => {
   const entity = useContextualEntity();
 };
 
-//
 const SingleBuildDetailsPage = () => {
   const { buildId } = useParams();
 };
@@ -152,6 +171,25 @@ const SingleBuildDetailsPage = () => {
 /* ************************************************************************* */
 // APP
 /* ************************************************************************* */
+
+const Sidebar = ({ routeRefs }) => {
+  return (
+    <ul>
+      <AppBarItem
+        title="Something"
+        to={catalogPlugin.exposes.catalogRootPage}
+      />
+      <AppBarItem title="Somethang" />
+      <AppBarItem title="Somethung" />
+    </ul>
+  );
+};
+
+createApp({
+  linkedRoutes: [
+    [catalogPlugin.producesRoutes.entity, tinglePlugin.consumesRoutes.entity],
+  ],
+});
 
 const rootRouteRef = createRouteRef();
 
