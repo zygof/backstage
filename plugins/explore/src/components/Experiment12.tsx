@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { Link } from '@material-ui/core';
 import React, {
   createContext,
   ReactNode,
@@ -30,8 +31,11 @@ import React, {
 import {
   Route,
   Routes,
+  Router,
   createRoutesFromChildren,
   useRoutes,
+  useMatch,
+  useParams,
 } from 'react-router';
 
 class RouteRef {
@@ -42,297 +46,147 @@ class RouteRef {
   }
 }
 
+type Extension<T> = {
+  expose(plugin: Plugin): T;
+};
+
 function createRouteRef() {
   return new RouteRef(Math.random().toString());
 }
 
 type PluginSpec = {
   id: string;
-  routes: { [name: string]: RouteRef };
+  producesRoutes?: { [name: string]: RouteRef };
+  consumesRoutes?: { [name: string]: RouteRef };
 };
 
-function createPlugin(spec: PluginSpec): PluginSpec {
-  return spec;
+type Plugin = {
+  id: string;
+  producesRoutes: { [name: string]: RouteRef };
+  consumesRoutes: { [name: string]: RouteRef };
+  exposeExtension(extension: Extension<ComponentType>): ComponentType;
+};
+
+function createPlugin(spec: PluginSpec): Plugin {
+  const { id, producesRoutes = {}, consumesRoutes = {} } = spec;
+  return {
+    id,
+    producesRoutes,
+    consumesRoutes,
+    exposeExtension(extension: Extension<ComponentType>): ComponentType {
+      return extension.expose(this);
+    },
+  };
 }
-
-class Plugin {
-  exposeExtension(extension: Extension): ComponentType {
-    return extension.expose(this);
-  }
-}
-
-type Extension<T> = {
-  expose(plugin: Plugin): T;
-};
-
-const myPlugin = new Plugin();
-
-const MyWidgetComponent = () => {
-  return <h1>IMMA WIDGIT</h1>;
-};
-
-const MyPageComponent = () => {
-  return <h1>IMMA PAGE</h1>;
-};
-
-const MyWidgetPageComponent = ({ children }: any) => {
-  const widgets = React.Children.map(
-    children,
-    (child, index) =>
-      console.log(
-        'DEBUG: getInternalNodeData(child) =',
-        child,
-        getInternalNodeData(child),
-      ) || (
-        <div key={index}>
-          Widget of size {getInternalNodeData(child)?.data?.size} {child}
-        </div>
-      ),
-  );
-
-  return (
-    <div>
-      <h1>HERES SOME WIDGETS</h1>
-      {widgets}
-    </div>
-  );
-};
-
-const MyPage = myPlugin.exposeExtension(
-  createRoutableExtension({
-    component: MyPageComponent,
-    routeRef: new RouteRef('page'),
-  }),
-);
-
-const MyWidgetPage = myPlugin.exposeExtension(
-  createRoutableExtension({
-    component: MyWidgetPageComponent,
-    routeRef: new RouteRef('widget-page'),
-  }),
-);
-
-const MyWidget1 = myPlugin.exposeExtension(
-  createWidgetExtension({
-    component: MyWidgetComponent,
-    size: 1,
-  }),
-);
-
-const MyWidget2 = myPlugin.exposeExtension(
-  createWidgetExtension({
-    component: MyWidgetComponent,
-    size: 2,
-  }),
-);
-
-const EntityContext = React.createContext<Entity>({
-  kind: 'component',
-  name: 'wat',
-});
-
-const EntityRouterComponent = ({ children }) => {
-  console.log(`DEBUG: RENDER LE ENTITY ROOOUTE`);
-  return (
-    <EntityContext.Provider value={{ kind: 'component', name: 'waaaaaaaat' }}>
-      {children}
-    </EntityContext.Provider>
-  );
-};
-
-const EntityRouter = myPlugin.exposeExtension(
-  createRoutableExtension({
-    routeRef: new RouteRef('entity-router'),
-    component: EntityRouterComponent,
-  }),
-);
-
-const EntityFilter = ({ filter, children }) => {
-  const entity = useContext(EntityContext);
-  if (filter(entity)) {
-    return children;
-  }
-  return null;
-};
-
-const EntityPageComponent = ({ children }) => {
-  return <div style={{ backgroundColor: 'blue' }}>{children}</div>;
-};
-
-const EntityPage = myPlugin.exposeExtension(
-  createComponentExtension({
-    component: EntityPageComponent,
-  }),
-);
 
 type Entity = {
   kind: string;
   name: string;
 };
 
-const rootRouteRef = new RouteRef('root-route-ref');
+type BackstageContext = {
+  currentEntity: Entity;
+};
 
-function isJsxElement(node: ReactNode): node is JSX.Element {
-  return typeof node === 'object' && node !== null && 'props' in node;
-}
-
-function collectAllTheThings(parentRoute: RouteRef, root: ReactNode) {
-  return React.Children.forEach(root, (child: ReactNode) => {
-    if (!isJsxElement(child)) {
-      return;
-    }
-
-    const { path, element, children } = child.props as {
-      path?: string;
-      element?: ReactNode;
-      children?: ReactNode;
-    };
-
-    if (path) {
-      const internalData = getInternalNodeData(child);
-      if (internalData?.type === 'core.routable') {
-        const { routeRef } = internalData.data as { routeRef: RouteRef };
-        console.log(
-          `Found native route at ${routeRef} at ${path} with parent ${parentRoute}`,
-        );
-        collectAllTheThings(routeRef, children);
-      } else if (isJsxElement(element)) {
-        const elementData = getInternalNodeData(element);
-        if (elementData) {
-          const { routeRef } = elementData.data as { routeRef: RouteRef };
-
-          console.log(
-            `Found rr route at ${routeRef} at ${path} with parent ${parentRoute}`,
-          );
-          collectAllTheThings(routeRef, element.props?.children);
-        } else {
-          collectAllTheThings(parentRoute, element.props?.children);
-        }
-      }
-    } else {
-      collectAllTheThings(parentRoute, children);
-    }
-  });
-}
+/* ************************************************************************* */
+// CATALOG
+/* ************************************************************************* */
 
 const catalogPlugin = createPlugin({
   id: 'catalog',
-  routes: {
-    root: createRouteRef(),
-    entity: cre,
+  producesRoutes: {
+    catalog: createRouteRef(),
+    entity: createRouteRef(), // <-- what about params kind,namespace,name
   },
 });
 
+export function useContextualEntity(): Entity {}
+
+/* ************************************************************************* */
+// TINGLE
+/* ************************************************************************* */
+
+// on /builds, /tingle/builds/:buildId
 const tinglePlugin = createPlugin({
   id: 'tingle',
-  routes: {},
+  producesRoutes: {
+    ownedBuilds: createRouteRef(),
+    entityBuilds: createRouteRef(), // entityRef?
+    build: createRouteRef(), // buildId
+  },
+  consumesRoutes: {
+    entity: createRouteRef(), // should be bound to the catalog
+  },
 });
+
+const OwnedBuildsPage = () => {
+  const { user } = useApi(identityApiRef);
+};
+
+//
+const EntityBuildsWidget = () => {
+  const entity = useContextualEntity();
+  const buildPathResolver = useRefResolver(tinglePlugin.producesRoutes.build);
+  const builds: { buildId: string }[] = useBuilds(entity);
+  return (
+    <ul>
+      {builds.map(({ buildId }) => (
+        <li>
+          <Link to={buildPathResolver({ buildId })}>{buildId}</Link>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+// This would be tab contents right?
+const EntityBuildsPage = () => {
+  const entity = useContextualEntity();
+};
+
+//
+const SingleBuildDetailsPage = () => {
+  const { buildId } = useParams();
+};
+
+/* ************************************************************************* */
+// APP
+/* ************************************************************************* */
+
+const rootRouteRef = createRouteRef();
+
+// This would be tab contents right?
+const EntityBuildsPageWrapper = () => {
+  const { kind, namespace, name } = useParams();
+  const entity = useEntity(kind, namespace, name);
+  return <EntityBuildsPage entity={entity} />;
+};
+
+// Shows a builds widget that wants to link to a build
+const EntityOverviewPage = () => {
+  return (
+    <div>
+      <EntityBuildsWidget />
+    </div>
+  );
+};
 
 export const Experiment = () => {
   const elements = (
-    <BackstageRouter>
-      <MyWidgetPage path="/my-widgets">
-        <MyWidget1 />
-        <MyWidget2 />
-      </MyWidgetPage>
-      <Route path="/my-thing" element={<MyPage />} />
-
-      <EntityRouter path="/entity/:kind/:name">
-        <EntityFilter filter={({ kind }) => kind === 'component'}>
-          <EntityPage>
-            <div>HYEAAAAAAAAAH</div>
-            dlfgkjhdfg
-            <Routes>
-              <MyPage path="/my-thang" />
-              <Route path="/my-thung" element={<MyPage />} />
-              <MyWidgetPage path="/my-widgets">
-                <MyWidget1 />
-                <MyWidget2 />
-              </MyWidgetPage>
-            </Routes>
-          </EntityPage>
-        </EntityFilter>
-      </EntityRouter>
-    </BackstageRouter>
+    <Bindings
+      bindings={[
+        [a, ''],
+        [b, ''],
+      ]}
+    >
+      <Router>
+        <Route path="/my-thing" element={<Page />} />
+        <Route path="/tingle" element={<TingleRoot />}>
+          <Route path="/:buildId" element={<SingleBuildDetailsPage />} />
+        </Route>
+      </Router>
+    </Bindings>
   );
-
-  const allTheThings = collectAllTheThings(rootRouteRef, elements);
 
   return elements;
 };
-
-function createRoutableExtension(conf: {
-  component: ComponentType<{ path: string }>;
-  routeRef: RouteRef;
-}): Extension<ComponentType<{ path: string }>> {
-  const { component, routeRef } = conf;
-  return createReactExtension({
-    component,
-    data: { routeRef },
-    type: 'core.routable',
-  });
-}
-
-function createWidgetExtension(conf: {
-  component: ComponentType<{}>;
-  size: number;
-}): Extension<ComponentType<{}>> {
-  const { component, size } = conf;
-  return createReactExtension({
-    component,
-    data: { size },
-    type: 'core.widget',
-  });
-}
-
-function createComponentExtension({
-  component,
-}: {
-  component: ComponentType<{}>;
-}): Extension<ComponentType<{}>> {
-  return createReactExtension({ component, type: 'core.component' });
-}
-
-function createReactExtension<T extends {}>(conf: {
-  component: ComponentType<T>;
-  type: string;
-  data?: object;
-}): Extension<ComponentType<T>> {
-  const { component: Component, data = {}, type } = conf;
-  return {
-    expose(plugin) {
-      const Wrapper = (props: T) => <Component {...props} />;
-      Wrapper.__BACKSTAGE_INTERNAL_DATA = { type, data, plugin };
-      return Wrapper;
-    },
-  };
-}
-
-type WrapperData = { type: string; data: object; plugin?: Plugin };
-type WrapperNode = ReactNode & {
-  type: { __BACKSTAGE_INTERNAL_DATA?: WrapperData };
-};
-
-function getInternalNodeData(node: ReactNode): WrapperData | undefined {
-  if (!node) {
-    return undefined;
-  }
-  const wrapperNode = node as WrapperNode;
-  const data = wrapperNode.type.__BACKSTAGE_INTERNAL_DATA;
-  return data ?? undefined;
-}
-
-const BackstageRouterComponent = ({ children }: PropsWithChildren<{}>) => {
-  const routes = createRoutesFromChildren(children).map(r => ({
-    ...r,
-    path: `${r.path}/*`,
-  }));
-  return useRoutes(routes, '');
-};
-
-const BackstageRouter = myPlugin.exposeExtension(
-  createRoutableExtension({
-    component: BackstageRouterComponent,
-    routeRef: rootRouteRef,
-  }),
-);
