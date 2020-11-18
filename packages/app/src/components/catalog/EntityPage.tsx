@@ -170,7 +170,7 @@ export const EntityPage = () => {
   // }
 };
 
-//@ts-ignore
+// @ts-ignore
 
 export default (
   <BackstageRoutes>

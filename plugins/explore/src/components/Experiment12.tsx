@@ -42,9 +42,22 @@ class RouteRef {
   }
 }
 
+function createRouteRef() {
+  return new RouteRef(Math.random().toString());
+}
+
+type PluginSpec = {
+  id: string;
+  routes: { [name: string]: RouteRef };
+};
+
+function createPlugin(spec: PluginSpec): PluginSpec {
+  return spec;
+}
+
 class Plugin {
-  exposeExtension(Extension: Extension): ComponentType {
-    return Extension.expose(this);
+  exposeExtension(extension: Extension): ComponentType {
+    return extension.expose(this);
   }
 }
 
@@ -81,15 +94,6 @@ const MyWidgetPageComponent = ({ children }: any) => {
     <div>
       <h1>HERES SOME WIDGETS</h1>
       {widgets}
-    </div>
-  );
-};
-
-const MyComposableWidgetComponent = ({ children }) => {
-  return (
-    <div>
-      <h1>HERES SOME COMPOSED WIDGETS BRO YEEZY WIDGEZEPTION</h1>
-      {children}
     </div>
   );
 };
@@ -210,6 +214,19 @@ function collectAllTheThings(parentRoute: RouteRef, root: ReactNode) {
     }
   });
 }
+
+const catalogPlugin = createPlugin({
+  id: 'catalog',
+  routes: {
+    root: createRouteRef(),
+    entity: cre,
+  },
+});
+
+const tinglePlugin = createPlugin({
+  id: 'tingle',
+  routes: {},
+});
 
 export const Experiment = () => {
   const elements = (

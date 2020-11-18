@@ -25,7 +25,19 @@ import React, {
 } from 'react';
 import { Entity } from '@backstage/catalog-model';
 import { Grid } from '@material-ui/core';
-import { Route, Routes, Outlet, useMatch, useLocation } from 'react-router-dom';
+import {
+  Route,
+  Routes,
+  Outlet,
+  useMatch,
+  useLocation,
+  useParams,
+} from 'react-router-dom';
+import { mapValues } from 'lodash';
+
+/* ************************************************************************ */
+// Common
+/* ************************************************************************ */
 
 type ConceptSpec = {
   id: string;
@@ -39,21 +51,24 @@ type ResolvedConcept = {
   route(params?: Record<string, string>): string;
 };
 
+type ConceptsMap = Record<string, ConceptSpec>;
+type ComponentsMap = Record<string, React.ElementType<{}>>;
+
 type PluginSpec<
-  ConceptsMap extends Record<string, ConceptSpec>,
-  ComponentsMap extends Record<string, React.ComponentType<{}>>
+  ConceptsT extends ConceptsMap,
+  ComponentsT extends ComponentsMap
 > = {
   id: string;
-  concepts: ConceptsMap;
-  components: ComponentsMap;
+  concepts: ConceptsT;
+  components: ComponentsT;
 };
 
 function declarePlugin<
-  ConceptsMap extends Record<string, ConceptSpec>,
-  ComponentsMap extends Record<string, React.ComponentType<{}>>
+  ConceptsT extends ConceptsMap,
+  ComponentsT extends ComponentsMap
 >(
-  spec: PluginSpec<ConceptsMap, ComponentsMap>,
-): PluginSpec<ConceptsMap, ComponentsMap> {
+  spec: PluginSpec<ConceptsT, ComponentsT>,
+): PluginSpec<ConceptsT, ComponentsT> {
   return spec;
 }
 
@@ -63,7 +78,9 @@ function declareConcept(defaultRoute?: string): ConceptSpec {
 
 function useConcept(spec: ConceptSpec | string): ResolvedConcept {}
 
+/* ************************************************************************ */
 // Catalog plugin
+/* ************************************************************************ */
 
 const CatalogPageHeader = () => {
   return <div>LE CATALOGUE</div>;
@@ -85,18 +102,9 @@ const useEntity = (): Entity => {
   return {} as Entity;
 };
 
+/* ************************************************************************ */
 // Tingle plugin
-
-const tinglePlugin = declarePlugin({
-  id: 'tingle',
-  concepts: {
-    root: declareConcept('/tingle'),
-    ownedBuilds: declareConcept('root?owner=me'),
-    buildDetails: declareConcept('root/build/:buildId'),
-    entityBuilds: declareConcept('catalog.entity/ci-cd'),
-  },
-  components: {},
-});
+/* ************************************************************************ */
 
 const useBuilds = (entity: Entity): { buildId: string }[] => {
   return [{ buildId: '1234' }];
@@ -120,7 +128,39 @@ const EntityOngoingBuildsWidget = ({ entity }: { entity: Entity }) => {
   );
 };
 
+// Note that pages DO NOT HAVE CHILDREN in their props
+
+// This is an example of a standalone page. You have to pick a route for it,
+// but it comes with an actual implementation and isn't meant to be pluggable
+// in and of itself. It links into itself.
+const OwnedBuildsPage = () => {
+  return <div>SOME BUILDS YO</div>;
+};
+
+// The build details page will have to know the buildId. Will it fetch it from
+// the match directly (forcing a certain naming in the user-chosen route), or
+// can it be picked out in the app?
+const BuildDetailsPage = () => {
+  const { buildId } = useParams();
+};
+
+const tinglePlugin = declarePlugin({
+  id: 'tingle',
+  concepts: {
+    root: declareConcept('/tingle'),
+    ownedBuilds: declareConcept('root?owner=me'),
+    buildDetails: declareConcept('root/build/:buildId'),
+    entityBuilds: declareConcept('catalog.entity/ci-cd'),
+  },
+  components: {
+    OwnedBuildsPage,
+    BuildDetailsPage,
+  },
+});
+
+/* ************************************************************************ */
 // App
+/* ************************************************************************ */
 
 const config = `
   app:
@@ -174,7 +214,7 @@ const RouteRegistryProvider = ({ children }: PropsWithChildren<{}>) => {
   );
 };
 
-const PageWrapper = ({
+const PluginPageWrapper = ({
   concept,
   element,
   children,
@@ -189,15 +229,39 @@ const PageWrapper = ({
   }
 };
 
+type PluginResult<
+  ConceptsT extends ConceptsMap,
+  ComponentsT extends ComponentsMap
+> = {
+  components: { [k in keyof ComponentsT]: React.ElementType<{}> };
+};
+
+const usePlugin = <
+  ConceptsT extends ConceptsMap,
+  ComponentsT extends ComponentsMap
+>(
+  spec: PluginSpec<ConceptsT, ComponentsT>,
+): PluginResult<ConceptsT, ComponentsT> => {
+  return {
+    components: mapValues(spec.components, InnerComponent => {
+      return () => (
+        <PluginPageWrapper>
+          <InnerComponent />
+        </PluginPageWrapper>
+      );
+    }),
+  };
+};
+
 const TheApp = () => {
-  const catalog = usePlugin(catalogPlugin);
+  const { CatalogPageHeader } = usePlugin(catalogPlugin).components;
   return (
     <RouteRegistryProvider>
       <Routes>
-        <Route path="/catalog" element={} />
+        <Route path="/catalog" element={<CatalogPageHeader />} />
         <Route path="/entity/:namespace/:kind/:name" element={}>
           <Route path="/" element={} />
-          <Route path="/ci-cd" element={} />
+          <Route path="/tingle-builds" element={} />
           <Route path="/docs" element={} />
         </Route>
         <Route path="/tingle" element={}>
