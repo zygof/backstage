@@ -110,7 +110,10 @@ export function useContextualEntity(): Entity {}
 const tinglePlugin = createPlugin({
   id: 'tingle',
   producesRoutes: {
-    ownedBuilds: createRouteRef(),
+    ownedBuilds: createSubRoute({
+      parent: plugin.consumesRoutes.entity,
+      ...moreConfig,
+    }),
     entityBuilds: createRouteRef(), // entityRef?
     build: createRouteRef({ params: ['buildId'] }), // buildId
   },
@@ -130,14 +133,14 @@ const tinglePlugin = createPlugin({
 
 */
 
-const concreteBuildPageRouteRef = createConcreteRouteRef(
-  catalogPlugin.routes.entity,
-  tinglePlugin.routes.build,
-);
-
-const buildsPageHref = app.createConcreteLink(
-  concreteBuildPageRouteRef.build([{ kind: 'asd' }, { buildId: 'asdasd' }]),
-);
+// No need for this kind of thing to exist yet, let's stick to absolute routes in the app
+// const concreteBuildPageRouteRef = createConcreteRouteRef(
+//   catalogPlugin.routes.entity,
+//   tinglePlugin.routes.build,
+// );
+// const buildsPageHref = app.createConcreteLink(
+//   concreteBuildPageRouteRef.build([{ kind: 'asd' }, { buildId: 'asdasd' }]),
+// );
 
 const OwnedBuildsPage = () => {
   const { user } = useApi(identityApiRef);
