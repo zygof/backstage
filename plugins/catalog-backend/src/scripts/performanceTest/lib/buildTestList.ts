@@ -14,9 +14,22 @@
  * limitations under the License.
  */
 
-export type { UrlReader, ReaderFactory, ReadTreeResponse } from './types';
-export { UrlReaders } from './UrlReaders';
-export { AzureUrlReader } from './AzureUrlReader';
-export { BitbucketUrlReader } from './BitbucketUrlReader';
-export { GithubUrlReader } from './GithubUrlReader';
-export { GitlabUrlReader } from './GitlabUrlReader';
+import fs from 'fs-extra';
+import path from 'path';
+
+export type Test = {
+  label: string;
+  path: string;
+};
+
+export async function buildTestList(): Promise<Test[]> {
+  // eslint-disable-next-line no-restricted-syntax
+  const testsPath = path.join(__dirname, '..', 'tests');
+  const files = await fs.readdir(testsPath);
+  return files.map(file => {
+    return {
+      label: file.replace(/\.yaml$/, ''),
+      path: path.join(testsPath, file),
+    };
+  });
+}

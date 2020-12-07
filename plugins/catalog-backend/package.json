@@ -19,11 +19,15 @@
     "postpack": "backstage-cli postpack",
     "clean": "backstage-cli clean"
   },
+  "bin": {
+    "catalog-backend-perf-test": "bin/catalog-backend-perf-test"
+  },
   "dependencies": {
     "@azure/msal-node": "^1.0.0-alpha.8",
     "@backstage/backend-common": "^0.3.3",
     "@backstage/catalog-model": "^0.4.0",
     "@backstage/config": "^0.1.1",
+    "@backstage/config-loader": "^0.4.0",
     "@octokit/graphql": "^4.5.6",
     "@types/express": "^4.17.6",
     "@types/ldapjs": "^1.0.9",
@@ -41,6 +45,7 @@
     "p-limit": "^3.0.2",
     "qs": "^6.9.4",
     "sqlite3": "^5.0.0",
+    "ts-node": "^8.6.2",
     "uuid": "^8.0.0",
     "winston": "^3.2.1",
     "yaml": "^1.9.2",

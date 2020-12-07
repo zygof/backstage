@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /*
  * Copyright 2020 Spotify AB
  *
@@ -14,9 +15,15 @@
  * limitations under the License.
  */
 
-export type { UrlReader, ReaderFactory, ReadTreeResponse } from './types';
-export { UrlReaders } from './UrlReaders';
-export { AzureUrlReader } from './AzureUrlReader';
-export { BitbucketUrlReader } from './BitbucketUrlReader';
-export { GithubUrlReader } from './GithubUrlReader';
-export { GitlabUrlReader } from './GitlabUrlReader';
+const path = require('path');
+
+require('ts-node').register({
+  transpileOnly: true,
+  /* eslint-disable-next-line no-restricted-syntax */
+  project: path.resolve(__dirname, '../../../packages/cli/config/tsconfig.json'),
+  compilerOptions: {
+    module: 'CommonJS',
+  },
+});
+
+require('../src/scripts/performanceTest/run');
