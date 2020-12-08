@@ -181,7 +181,7 @@
 <p>We’re proud to announce that our first internal plugin at Spotify has been open-sourced as part of Backstage. This plugin works with the newly open-sourced <a href="https://github.com/spotify/lighthouse-audit-service">lighthouse-audit-service</a> to run and track Lighthouse audits for your websites.</p>
 ]]></summary>
         <author>
-            <name>Paul Marbach</name>
+            <name>Paul Marbach, Spotify</name>
             <uri>http://twitter.com/fastfrwrd</uri>
         </author>
     </entry>
