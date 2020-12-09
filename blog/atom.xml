@@ -18,7 +18,7 @@
 <p>Are we turning engineers into accountants? Nope, we’re just letting engineers do what they do best, in the place that feels natural to them: inside Backstage.</p>
 ]]></summary>
         <author>
-            <name>Janisa Anandamohan</name>
+            <name>Janisa Anandamohan, Spotify</name>
             <uri>https://twitter.com/janisa_a</uri>
         </author>
     </entry>
@@ -168,7 +168,7 @@
 <p>In this blog post we’ll look at what a Backstage app is and how to create one using our <a href="https://www.npmjs.com/package/@backstage/cli">CLI</a>.</p>
 ]]></summary>
         <author>
-            <name>Marcus Eide</name>
+            <name>Marcus Eide, Spotify</name>
             <uri>https://github.com/marcuseide</uri>
         </author>
     </entry>
