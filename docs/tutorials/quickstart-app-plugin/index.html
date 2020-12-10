@@ -128,10 +128,10 @@ plugin. And now, the API fun begins.</p>
 <li>Adjust the ExampleComponent from inline to block</li>
 </ol>
 <p><em>from inline:</em></p>
-<pre><code class="hljs css language-tsx">const ExampleComponent: FC&lt;{}&gt; = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> ( ... )
+<pre><code class="hljs css language-tsx">const ExampleComponent = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> ( ... )
 </code></pre>
 <p><em>to block:</em></p>
-<pre><code class="hljs css language-tsx">const ExampleComponent: FC&lt;{}&gt; = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+<pre><code class="hljs css language-tsx">const ExampleComponent = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
 
     <span class="hljs-keyword">return</span> (
         ...
@@ -173,7 +173,7 @@ changes, let's start by wiping this component clean.</p>
 <code>root: plugins &gt; github-playground &gt; src &gt; components &gt; ExampleFetchComponent &gt; ExampleFetchComponent.tsx</code></li>
 <li>Replace everything in the file with the following:</li>
 </ol>
-<pre><code class="hljs css language-tsx"><span class="hljs-keyword">import</span> React, { FC } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<pre><code class="hljs css language-tsx"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
 <span class="hljs-keyword">import</span> { useAsync } <span class="hljs-keyword">from</span> <span class="hljs-string">'react-use'</span>;
 <span class="hljs-keyword">import</span> Alert <span class="hljs-keyword">from</span> <span class="hljs-string">'@material-ui/lab/Alert'</span>;
 <span class="hljs-keyword">import</span> {
@@ -185,7 +185,7 @@ changes, let's start by wiping this component clean.</p>
 <span class="hljs-keyword">import</span> { useApi } <span class="hljs-keyword">from</span> <span class="hljs-string">'@backstage/core-api'</span>;
 <span class="hljs-keyword">import</span> { graphql } <span class="hljs-keyword">from</span> <span class="hljs-string">'@octokit/graphql'</span>;
 
-<span class="hljs-keyword">const</span> ExampleFetchComponent: FC&lt;{}&gt; = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+<span class="hljs-keyword">const</span> ExampleFetchComponent = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
   <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Nothing to see yet<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>;
 };
 
@@ -254,7 +254,7 @@ component will get used if we have data to display.</p>
 <span class="hljs-symbol">  viewer:</span> Viewer;
 };
 
-export const <span class="hljs-string">DenseTable:</span> FC&lt;DenseTableProps&gt; = ({ viewer }) =&gt; {
+export const DenseTable = ({ viewer }: DenseTableProps) =&gt; {
   const <span class="hljs-string">columns:</span> TableColumn[] = [
     { <span class="hljs-string">title:</span> <span class="hljs-string">'Name'</span>, <span class="hljs-string">field:</span> <span class="hljs-string">'name'</span> },
     { <span class="hljs-string">title:</span> <span class="hljs-string">'Created'</span>, <span class="hljs-string">field:</span> <span class="hljs-string">'createdAt'</span> },

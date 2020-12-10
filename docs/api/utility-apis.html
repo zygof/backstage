@@ -84,10 +84,10 @@ exported by <code>@backstage/core</code>. There are many
 <p>To access one of the Utility APIs inside a React component, use the <code>useApi</code>
 hook exported by <code>@backstage/core</code>, or the <code>withApis</code> HOC if you prefer class
 components. For example, the <code>ErrorApi</code> can be accessed like this:</p>
-<pre><code class="hljs css language-tsx"><span class="hljs-keyword">import</span> React, { FC } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<pre><code class="hljs css language-tsx"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
 <span class="hljs-keyword">import</span> { useApi, errorApiRef } <span class="hljs-keyword">from</span> <span class="hljs-string">'@backstage/core'</span>;
 
-<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> MyComponent: FC&lt;{}&gt; = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> MyComponent = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
   <span class="hljs-keyword">const</span> errorApi = useApi(errorApiRef);
 
   <span class="hljs-comment">// Signal to the app that something went wrong, and display the error to the user.</span>
