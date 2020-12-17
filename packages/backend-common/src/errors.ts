@@ -48,6 +48,11 @@ class CustomErrorBase extends Error {
 }
 
 /**
+ * The remote was not modified.
+ */
+export class NotModifiedError extends CustomErrorBase {}
+
+/**
  * The given inputs are malformed and cannot be processed.
  */
 export class InputError extends CustomErrorBase {}

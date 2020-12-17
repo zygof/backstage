@@ -15,18 +15,20 @@
  */
 
 import {
-  GitHubIntegrationConfig,
-  readGitHubIntegrationConfigs,
   getGitHubFileFetchUrl,
   getGitHubRequestOptions,
+  GitHubIntegrationConfig,
+  readGitHubIntegrationConfigs,
 } from '@backstage/integration';
 import fetch from 'cross-fetch';
 import parseGitUri from 'git-url-parse';
 import { Readable } from 'stream';
-import { InputError, NotFoundError } from '../errors';
+import { InputError, NotFoundError, NotModifiedError } from '../errors';
+import { ChangeTrackingFetcher } from './ChangeTrackingFetcher';
 import { ReadTreeResponseFactory } from './tree';
 import {
   ReaderFactory,
+  ReadOptions,
   ReadTreeOptions,
   ReadTreeResponse,
   UrlReader,
@@ -41,8 +43,12 @@ export class GithubUrlReader implements UrlReader {
     const configs = readGitHubIntegrationConfigs(
       config.getOptionalConfigArray('integrations.github') ?? [],
     );
+    const fetcher = new ChangeTrackingFetcher({ maxAgeMillis: 1e9 });
     return configs.map(provider => {
-      const reader = new GithubUrlReader(provider, { treeResponseFactory });
+      const reader = new GithubUrlReader(provider, {
+        treeResponseFactory,
+        delegateFetcher: fetcher.fetch.bind(fetcher),
+      });
       const predicate = (url: URL) => url.host === provider.host;
       return { reader, predicate };
     });
@@ -50,7 +56,14 @@ export class GithubUrlReader implements UrlReader {
 
   constructor(
     private readonly config: GitHubIntegrationConfig,
-    private readonly deps: { treeResponseFactory: ReadTreeResponseFactory },
+    private readonly deps: {
+      treeResponseFactory: ReadTreeResponseFactory;
+      delegateFetcher: (
+        url: string,
+        init?: RequestInit | undefined,
+        options?: ReadOptions | undefined,
+      ) => Promise<Response>;
+    },
   ) {
     if (!config.apiBaseUrl && !config.rawBaseUrl) {
       throw new Error(
@@ -59,14 +72,21 @@ export class GithubUrlReader implements UrlReader {
     }
   }
 
-  async read(url: string): Promise<Buffer> {
+  async read(url: string, readOptions?: ReadOptions): Promise<Buffer> {
     const ghUrl = getGitHubFileFetchUrl(url, this.config);
-    const options = getGitHubRequestOptions(this.config);
+    const requestOptions = getGitHubRequestOptions(this.config);
 
     let response: Response;
     try {
-      response = await fetch(ghUrl.toString(), options);
+      response = await this.deps.delegateFetcher(
+        ghUrl.toString(),
+        requestOptions,
+        readOptions,
+      );
     } catch (e) {
+      if (e instanceof NotModifiedError) {
+        throw e;
+      }
       throw new Error(`Unable to read ${url}, ${e}`);
     }
 

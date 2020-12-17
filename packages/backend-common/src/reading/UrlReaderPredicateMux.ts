@@ -42,7 +42,7 @@ export class UrlReaderPredicateMux implements UrlReader {
     this.readers.push(tuple);
   }
 
-  read(url: string): Promise<Buffer> {
+  async read(url: string): Promise<Buffer> {
     const parsed = new URL(url);
 
     for (const { predicate, reader } of this.readers) {
@@ -58,7 +58,10 @@ export class UrlReaderPredicateMux implements UrlReader {
     throw new Error(`No reader found that could handle '${url}'`);
   }
 
-  readTree(url: string, options?: ReadTreeOptions): Promise<ReadTreeResponse> {
+  async readTree(
+    url: string,
+    options?: ReadTreeOptions,
+  ): Promise<ReadTreeResponse> {
     const parsed = new URL(url);
 
     for (const { predicate, reader } of this.readers) {

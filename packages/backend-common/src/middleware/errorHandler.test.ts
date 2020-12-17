@@ -34,14 +34,14 @@ describe('errorHandler', () => {
     expect(response.text).toBe('some message');
   });
 
-  it('doesnt try to send the response again if its already been sent', async () => {
+  it('does not try to send the response again if its already been sent', async () => {
     const app = express();
     const mockSend = jest.fn();
 
     app.use('/works_with_async_fail', (_, res) => {
       res.status(200).send('hello');
 
-      // mutate the response object to test the middlware.
+      // mutate the response object to test the middleware.
       // it's hard to catch errors inside middleware from the outside.
       // @ts-ignore
       res.send = mockSend;
@@ -72,6 +72,9 @@ describe('errorHandler', () => {
 
   it('handles well-known error classes', async () => {
     const app = express();
+    app.use('/NotModifiedError', () => {
+      throw new errors.NotModifiedError();
+    });
     app.use('/InputError', () => {
       throw new errors.InputError();
     });
@@ -90,6 +93,7 @@ describe('errorHandler', () => {
     app.use(errorHandler());
 
     const r = request(app);
+    expect((await r.get('/NotModifiedError')).status).toBe(304);
     expect((await r.get('/InputError')).status).toBe(400);
     expect((await r.get('/AuthenticationError')).status).toBe(401);
     expect((await r.get('/NotAllowedError')).status).toBe(403);

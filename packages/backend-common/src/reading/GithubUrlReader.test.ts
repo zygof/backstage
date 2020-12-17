@@ -22,6 +22,7 @@ import { setupServer } from 'msw/node';
 import path from 'path';
 import { GithubUrlReader } from './GithubUrlReader';
 import { ReadTreeResponseFactory } from './tree';
+import fetch from 'cross-fetch';
 
 const treeResponseFactory = ReadTreeResponseFactory.create({
   config: new ConfigReader({}),
@@ -35,7 +36,7 @@ describe('GithubUrlReader', () => {
           host: 'github.com',
           apiBaseUrl: 'https://api.github.com',
         },
-        { treeResponseFactory },
+        { treeResponseFactory, delegateFetcher: fetch },
       );
       await expect(
         processor.read('https://not.github.com/apa'),
@@ -74,7 +75,7 @@ describe('GithubUrlReader', () => {
           host: 'github.com',
           apiBaseUrl: 'https://api.github.com',
         },
-        { treeResponseFactory },
+        { treeResponseFactory, delegateFetcher: fetch },
       );
 
       const response = await processor.readTree(
@@ -110,7 +111,7 @@ describe('GithubUrlReader', () => {
           host: 'ghe.github.com',
           apiBaseUrl: 'https://api.github.com',
         },
-        { treeResponseFactory },
+        { treeResponseFactory, delegateFetcher: fetch },
       );
 
       const response = await processor.readTree(
@@ -131,7 +132,7 @@ describe('GithubUrlReader', () => {
           host: 'github.com',
           apiBaseUrl: 'https://api.github.com',
         },
-        { treeResponseFactory },
+        { treeResponseFactory, delegateFetcher: fetch },
       );
 
       await expect(
@@ -147,7 +148,7 @@ describe('GithubUrlReader', () => {
           host: 'github.com',
           apiBaseUrl: 'https://api.github.com',
         },
-        { treeResponseFactory },
+        { treeResponseFactory, delegateFetcher: fetch },
       );
 
       const response = await processor.readTree(
