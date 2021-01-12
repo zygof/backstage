@@ -80,7 +80,7 @@ for the latest instructions on the following steps involving GCP.</p>
   <span class="hljs-attr">publisher:</span>
     <span class="hljs-attr">type:</span> <span class="hljs-string">'googleGcs'</span>
 </code></pre>
-<p><strong>2. GCS Bucket</strong></p>
+<p><strong>2. Create a GCS Bucket</strong></p>
 <p>Create a dedicated Google Cloud Storage bucket for TechDocs sites.
 techdocs-backend will publish documentation to this bucket. TechDocs will fetch
 files from here to serve documentation in Backstage. Note that the bucket names
@@ -135,135 +135,73 @@ file's content and set as an environment variable. And then use</p>
 <p>Your Backstage app is now ready to use Google Cloud Storage for TechDocs, to
 store and read the static generated documentation files.</p>
 <h2><a class="anchor" aria-hidden="true" id="configuring-aws-s3-bucket-with-techdocs"></a><a href="#configuring-aws-s3-bucket-with-techdocs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuring AWS S3 Bucket with TechDocs</h2>
-<p>Follow the
-<a href="https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html">official AWS S3 documentation</a>
-for the latest instructions on the following steps involving AWS S3.</p>
 <p><strong>1. Set <code>techdocs.publisher.type</code> config in your <code>app-config.yaml</code></strong></p>
 <p>Set <code>techdocs.publisher.type</code> to <code>'awsS3'</code>.</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">techdocs:</span>
   <span class="hljs-attr">publisher:</span>
     <span class="hljs-attr">type:</span> <span class="hljs-string">'awsS3'</span>
 </code></pre>
-<p><strong>2. AWS Policies</strong></p>
-<p>AWS Policies lets you <strong>control access</strong> to Amazon Web Services (AWS) products
-and resources. Here we will use a user policy <strong>and</strong> a bucket policy to show
-you the different possibilities you have but you can use only one.</p>
-<p><img data-zoomable src="../../assets/techdocs/aws-s3.drawio.svg" alt="AWS S3" width="500" /></p>
-<p>This is an example of how you can manage your policies:</p>
-<p>a. Admin user creates a <strong>bucket policy</strong> granting a set of permissions to our
-TechDocs user.</p>
-<p>b. Admin user attaches a <strong>user policy</strong> to the TechDocs user granting
-additional permissions.</p>
-<p>c. TechDocs User then tries permissions granted via both the <strong>bucket</strong> policy
-and the <strong>user</strong> policy.</p>
-<p><strong>2.1 Creation</strong></p>
-<p><strong>2.1.1 Create an Admin user</strong> (if you don't have one yet)</p>
-<p>Create an <strong>administrator user</strong> account <code>ADMIN_USER</code> and grant it administrator
-privileges by attaching a user policy giving the account <strong>full access</strong>. Note
-down the Admin User credentials and IAM User Sign-In URL as you will need to use
-this information in the next step.</p>
-<p><strong>2.1.2 Create an AWS S3 Bucket</strong></p>
-<p>Using the credentials of your Admin User <code>ADMIN_USER</code>, and the special IAM user
-sign-in URL, create a dedicated <strong>bucket</strong> for TechDocs sites. techdocs-backend
-will publish documentation to this bucket. TechDocs will fetch files from here
-to serve documentation in Backstage.</p>
-<p>Set the name of the bucket to <code>techdocs.publisher.awsS3.bucketName</code>.</p>
+<p><strong>2. Create an S3 Bucket</strong></p>
+<p>Create a dedicated AWS S3 bucket for the storage of TechDocs sites.
+<a href="https://docs.aws.amazon.com/AmazonS3/latest/user-guide/create-bucket.html">Refer to the official documentation</a>.</p>
+<p>TechDocs will publish documentation to this bucket and will fetch files from
+here to serve documentation in Backstage. Note that the bucket names are
+globally unique.</p>
+<p>Set the config <code>techdocs.publisher.awsS3.bucketName</code> in your <code>app-config.yaml</code>
+to the name of the bucket you just created.</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">techdocs:</span>
   <span class="hljs-attr">publisher:</span>
     <span class="hljs-attr">type:</span> <span class="hljs-string">'awsS3'</span>
     <span class="hljs-attr">awsS3:</span>
       <span class="hljs-attr">bucketName:</span> <span class="hljs-string">'name-of-techdocs-storage-bucket'</span>
 </code></pre>
-<p><strong>2.1.3 Create the <code>TechDocs</code> user</strong></p>
-<p>This user will be used to interact with your bucket, it will only have
-permissions to <strong>get - put</strong> objects.</p>
-<p>In the IAM console, do the following:</p>
+<p><strong>3a. (Recommended) Setup authentication the AWS way, using environment
+variables</strong></p>
+<p>You should follow the
+<a href="https://docs.aws.amazon.com/general/latest/gr/aws-access-keys-best-practices.html">AWS security best practices guide for authentication</a>.</p>
+<p>If the environment variables</p>
 <ul>
-<li>Create a new user, <code>TechDocs</code></li>
-<li>Note down the TechDocs User credentials</li>
-<li>Note down the Amazon Resource Name (ARN) for the TechDocs user. In the IAM
-console, select the TechDocs user, and you can find the user ARN in the
-Summary tab.</li>
+<li><code>AWS_ACCESS_KEY_ID</code></li>
+<li><code>AWS_SECRET_ACCESS_KEY</code></li>
+<li><code>AWS_REGION</code></li>
 </ul>
-<p><strong>2.2 Attach policies</strong></p>
-<p>Remember that you can use Bucket policy <strong>or</strong> User policy. Just make sure that
-you grant all the permissions to the TechDocs user: <code>s3:PutObject</code>,
-<code>s3:GetObject</code>, <code>s3:ListBucket</code> and <code>s3:GetBucketLocation</code>.</p>
-<p><strong>2.2.1 Create the bucket policy</strong></p>
-<p>You now have to attach the following policy to your bucket in the Permission
-section:</p>
-<pre><code class="hljs css language-json">{
-  <span class="hljs-attr">"Version"</span>: <span class="hljs-string">"2012-10-17"</span>,
-  <span class="hljs-attr">"Statement"</span>: [
-    {
-      <span class="hljs-attr">"Sid"</span>: <span class="hljs-string">"statement1"</span>,
-      <span class="hljs-attr">"Effect"</span>: <span class="hljs-string">"Allow"</span>,
-      <span class="hljs-attr">"Principal"</span>: {
-        <span class="hljs-attr">"AWS"</span>: <span class="hljs-string">"arn:aws:iam::YOUR_ACCOUNT_ID:user/TechDocs"</span>
-      },
-      <span class="hljs-attr">"Action"</span>: [<span class="hljs-string">"s3:GetBucketLocation"</span>, <span class="hljs-string">"s3:ListBucket"</span>],
-      <span class="hljs-attr">"Resource"</span>: [<span class="hljs-string">"arn:aws:s3:::name-of-techdocs-storage-bucket"</span>]
-    },
-    {
-      <span class="hljs-attr">"Sid"</span>: <span class="hljs-string">"statement2"</span>,
-      <span class="hljs-attr">"Effect"</span>: <span class="hljs-string">"Allow"</span>,
-      <span class="hljs-attr">"Principal"</span>: {
-        <span class="hljs-attr">"AWS"</span>: <span class="hljs-string">"arn:aws:iam::YOUR_ACCOUNT_ID:user/TechDocs"</span>
-      },
-      <span class="hljs-attr">"Action"</span>: [<span class="hljs-string">"s3:GetObject"</span>],
-      <span class="hljs-attr">"Resource"</span>: [<span class="hljs-string">"arn:aws:s3:::name-of-techdocs-storage-bucket/*"</span>]
-    }
-  ]
-}
-</code></pre>
-<ul>
-<li>The first statement grants <strong>TechDocs User</strong> the bucket operation permissions
-<code>s3:GetBucketLocation</code> and <code>s3:ListBucket</code> which are permissions required by
-the console.</li>
-<li>The second statement grants the <code>s3:GetObject</code> permission. (<strong>NOTE :</strong> if you
-do not use the user policy defined below you must also add the <code>s3:PutObject</code>
-permission to allow the TechDocs user to add objects.)</li>
-</ul>
-<p><strong>2.2.2 Create the user policy</strong></p>
-<p>Create an inline policy for the TechDocs user by using the following policy:</p>
-<pre><code class="hljs css language-json">{
-  <span class="hljs-attr">"Version"</span>: <span class="hljs-string">"2012-10-17"</span>,
-  <span class="hljs-attr">"Statement"</span>: [
-    {
-      <span class="hljs-attr">"Sid"</span>: <span class="hljs-string">"PermissionForObjectOperations"</span>,
-      <span class="hljs-attr">"Effect"</span>: <span class="hljs-string">"Allow"</span>,
-      <span class="hljs-attr">"Action"</span>: [<span class="hljs-string">"s3:PutObject"</span>],
-      <span class="hljs-attr">"Resource"</span>: [<span class="hljs-string">"arn:aws:s3:::name-of-techdocs-storage-bucket/*"</span>]
-    }
-  ]
-}
-</code></pre>
-<p>See more details in the section
-<a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html">Working with Inline Policies</a>.</p>
-<p>Now you need to fill in the environment variables with the <code>TechDocs</code> User
-credentials. You can also specify a region if you want to accesses the resources
-in a specific region. Otherwise no region will be selected by default.</p>
-<pre><code class="hljs css language-properties"><span class="hljs-attr">TECHDOCS_AWSS3_ACCESS_KEY_ID_CREDENTIAL</span>=<span class="hljs-string">"TECHDOCS_ACCESS_KEY_ID"</span>
-<span class="hljs-attr">TECHDOCS_AWSS3_SECRET_ACCESS_KEY_CREDENTIAL</span>=<span class="hljs-string">"TECHDOCS_SECRET_ACCESS_KEY"</span>
-<span class="hljs-attr">AWSS3_REGION</span>=<span class="hljs-string">"" // Optional</span>
-</code></pre>
-<p>Make it available in your Backstage server and/or your local development server
-and set it in the app config techdocs.publisher.awsS3.</p>
+<p>are set and can be used to access the bucket you created in step 2, they will be
+used by the AWS SDK v3 Node.js client for authentication.
+<a href="https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-environment.html">Refer to the official documentation.</a></p>
+<p>If the environment variables are missing, the AWS SDK tries to read the
+<code>~/.aws/credentials</code> file for credentials.
+<a href="https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-shared.html">Refer to the official documentation.</a></p>
+<p>Note that the region of the bucket has to be set for the AWS SDK to work.
+<a href="https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-region.html">See this</a>.</p>
+<p><strong>3b. Authentication using app-config.yaml</strong></p>
+<p>AWS credentials and region can be provided to the AWS SDK via <code>app-config.yaml</code>.
+If the configs below are present, they will be used over existing <code>AWS_*</code>
+environment variables and the <code>~/.aws/credentials</code> config file.</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">techdocs:</span>
   <span class="hljs-attr">publisher:</span>
     <span class="hljs-attr">type:</span> <span class="hljs-string">'awsS3'</span>
     <span class="hljs-attr">awsS3:</span>
+      <span class="hljs-attr">bucketName:</span> <span class="hljs-string">'name-of-techdocs-storage-bucket'</span>
+      <span class="hljs-attr">region:</span>
+        <span class="hljs-string">$env:</span> <span class="hljs-string">AWS_REGION</span>
       <span class="hljs-attr">credentials:</span>
         <span class="hljs-attr">accessKeyId:</span>
-          <span class="hljs-string">$env:</span> <span class="hljs-string">TECHDOCS_AWSS3_ACCESS_KEY_ID_CREDENTIAL</span>
+          <span class="hljs-string">$env:</span> <span class="hljs-string">AWS_ACCESS_KEY_ID</span>
         <span class="hljs-attr">secretAccessKey:</span>
-          <span class="hljs-string">$env:</span> <span class="hljs-string">TECHDOCS_AWSS3_SECRET_ACCESS_KEY_CREDENTIAL</span>
-      <span class="hljs-attr">region:</span>
-        <span class="hljs-string">$env:</span> <span class="hljs-string">AWSS3_REGION</span>
+          <span class="hljs-string">$env:</span> <span class="hljs-string">AWS_SECRET_ACCESS_KEY</span>
 </code></pre>
-<p><strong>3. That's it!</strong></p>
-<p>Your Backstage app is now ready to use AWS S3 for TechDocs, to store the static
-generated documentation files.</p>
+<p>Refer to the
+<a href="https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/getting-your-credentials.html">official AWS documentation for obtaining the credentials</a>.</p>
+<p>Note: If you are using Amazon EC2 instance to deploy Backstage, you do not need
+to obtain the access keys separately. They can be made available in the
+environment automatically by defining appropriate IAM role with access to the
+bucket. Read more
+<a href="https://docs.aws.amazon.com/general/latest/gr/aws-access-keys-best-practices.html#use-roles">here</a>.</p>
+<p><strong>4. That's it!</strong></p>
+<p>Your Backstage app is now ready to use AWS S3 for TechDocs, to store and read
+the static generated documentation files. When you start the backend of the app,
+you should be able to see
+<code>techdocs info Successfully connected to the AWS S3 bucket</code> in the logs.</p>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/features/techdocs/configuration"><span class="arrow-prev">← </span><span class="function-name-prevnext">TechDocs Configuration Options</span></a><a class="docs-next button" href="/docs/features/techdocs/troubleshooting"><span>Troubleshooting</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#configuring-google-gcs-bucket-with-techdocs">Configuring Google GCS Bucket with TechDocs</a></li><li><a href="#configuring-aws-s3-bucket-with-techdocs">Configuring AWS S3 Bucket with TechDocs</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><div class="footer-title"><a href="/"><h2 class="footerLogo"></h2></a></div><div><h5>Docs</h5><a href="/docs/overview/what-is-backstage">What is Backstage?</a><a href="/docs/getting-started/">Getting started</a><a href="/docs/features/software-catalog/software-catalog-overview">Service Catalog</a><a href="/docs/plugins/create-a-plugin">Create a Plugin</a><a href="/docs/dls/design">Designing for Backstage</a></div><div><h5>Community</h5><a href="https://discord.gg/MUpMjP2">Support chatroom</a><a href="https://github.com/backstage/backstage/blob/master/CONTRIBUTING.md">Contributing</a><a href="https://mailchi.mp/spotify/backstage-community">Subscribe to our newsletter</a><a href="https://www.cncf.io/sandbox-projects/">CNCF Sandbox</a></div><div><h5>More</h5><a href="https://spotify.github.io/">Open Source @ Spotify</a><a href="https://engineering.atspotify.com/">Spotify Engineering Blog</a><a href="https://developer.spotify.com/">Spotify for Developers</a><a href="https://github.com/backstage/backstage">GitHub</a><a class="github-button" href="https://github.com/backstage/backstage" data-icon="octicon-star" data-count-href="/backstage/backstage/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="https://twitter.com/SpotifyEng" class="twitter-follow-button">Follow @SpotifyEng</a></div></div></section><p style="text-align:center"><a href="https://spotify.github.io">Made with ❤️  at Spotify</a></p><p class="copyright">Copyright © 2021 Backstage Project Authors. All rights reserved. The Linux Foundation has registered trademarks and uses trademarks. For a list of trademarks of The Linux Foundation, please see our Trademark Usage page: https://www.linuxfoundation.org/trademark-usage</p></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
