@@ -111,6 +111,20 @@ packages that depend on <code>@backstage/backend-common</code>, or temporarily d
 those plugins in your backend. This is because the transformation of backend
 module tree stops whenever a non-local package is encountered, and from that
 point node will <code>require</code> packages directly for that entire module subtree.</p>
+<p>Type checking can also have issues when linking in external packages, since the
+linked in packages will use the types in the external project and dependency
+version mismatches between the two projects may cause errors. To fix any of
+those errors you need to sync versions of the dependencies in the two projects.
+A simple way to do this can be to copy over <code>yarn.lock</code> from the external
+project and run <code>yarn install</code>, although this is quite intrusive and can cause
+other issues in existing projects, so use this method with care. It can often be
+best to simply ignore the type errors, as app serving will work just fine
+anyway.</p>
+<p>Another issue with type checking is that the incremental type cache doesn't
+invalidate correctly for the linked in packages, causing type checking to not
+reflect changes made to types. You can work around this by either setting
+<code>compilerOptions.incremental = false</code> in <code>tsconfig.json</code>, or by deleting the
+types cache folder <code>dist-types</code> before running <code>yarn tsc</code>.</p>
 <h3><a class="anchor" aria-hidden="true" id="troubleshooting"></a><a href="#troubleshooting" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Troubleshooting</h3>
 <p>The create app command doesn't always work as expected, this is a collection of
 some of the commonly encountered issues and solutions.</p>
