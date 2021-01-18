@@ -199,13 +199,6 @@ separate Docker images.</p>
 <li>The Lighthouse audit service container</li>
 </ol>
 <p><img src="../assets/architecture-overview/containerised.png" alt="Boxes around the architecture to indicate how it is containerised"></p>
-<p>The frontend container can be built with a provided command.</p>
-<pre><code class="hljs css language-bash">yarn install
-yarn tsc
-yarn run docker-build:app
-</code></pre>
-<p>Running this will simply generate a Docker container containing the contents of
-the UIs <code>dist</code> directory.</p>
 <p>The backend container can be built by running the following command:</p>
 <pre><code class="hljs css language-bash">yarn run docker-build
 </code></pre>
