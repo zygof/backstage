@@ -73,7 +73,7 @@ use.</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-comment"># Example:</span>
 <span class="hljs-attr">metadata:</span>
   <span class="hljs-attr">annotations:</span>
-    <span class="hljs-attr">backstage.io/managed-by-location:</span> <span class="hljs-string">url:http://github.com/backstage/backstage/catalog-info.yaml</span>
+    <span class="hljs-attr">backstage.io/managed-by-location:</span> <span class="hljs-string">url:http://github.com/backstage/backstage/blob/master/catalog-info.yaml</span>
 </code></pre>
 <p>The value of this annotation is a so called location reference string, that
 points to the source from which the entity was originally fetched. This
@@ -92,20 +92,20 @@ colon is always present.</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-comment"># Example:</span>
 <span class="hljs-attr">metadata:</span>
   <span class="hljs-attr">annotations:</span>
-    <span class="hljs-attr">backstage.io/managed-by-origin-location:</span> <span class="hljs-string">url:http://github.com/backstage/backstage/catalog-info.yaml</span>
+    <span class="hljs-attr">backstage.io/managed-by-origin-location:</span> <span class="hljs-string">url:http://github.com/backstage/backstage/blob/master/catalog-info.yaml</span>
 </code></pre>
 <p>The value of this annotation is a location reference string (see above). It
 points to the location, whose registration lead to the creation of the entity.
 In most cases, the <code>backstage.io/managed-by-location</code> and
 <code>backstage.io/managed-by-origin-location</code> will be equal. They will be different
 if the original location delegates to another location. A common case is, that a
-location is registered as <code>bootstrap:boostrap</code> which means that it is part of
+location is registered as <code>bootstrap:bootstrap</code> which means that it is part of
 the <code>app-config.yaml</code> of a Backstage installation.</p>
 <h3><a class="anchor" aria-hidden="true" id="backstageiotechdocs-ref"></a><a href="#backstageiotechdocs-ref" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>backstage.io/techdocs-ref</h3>
 <pre><code class="hljs css language-yaml"><span class="hljs-comment"># Example:</span>
 <span class="hljs-attr">metadata:</span>
   <span class="hljs-attr">annotations:</span>
-    <span class="hljs-attr">backstage.io/techdocs-ref:</span> <span class="hljs-string">url:https://github.com/backstage/backstage.git</span>
+    <span class="hljs-attr">backstage.io/techdocs-ref:</span> <span class="hljs-string">url:https://github.com/backstage/backstage/tree/master</span>
 </code></pre>
 <p>The value of this annotation is a location reference string (see above). If this
 annotation is specified, it is expected to point to a repository that the
